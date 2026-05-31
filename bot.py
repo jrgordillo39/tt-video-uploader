@@ -1,4 +1,5 @@
 import os
+import asyncio
 import logging
 import tempfile
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -17,23 +18,27 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-TELEGRAM_TOKEN  = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_TOKEN   = os.getenv("TELEGRAM_BOT_TOKEN")
 ALLOWED_USER_IDS = list(map(int, os.getenv("ALLOWED_USER_IDS", "").split(","))) if os.getenv("ALLOWED_USER_IDS") else []
 
 tiktok = TikTokUploader()
 
 # ConversationHandler states
-WAITING_ALIAS = 1
-WAITING_CODE  = 2
+WAITING_ALIAS   = 1
+WAITING_CODE    = 2
+WAITING_CAPTION = 3
 
-# ─── Auth ─────────────────────────────────────────────────────────────────────
+# Delay en segundos para agrupar videos del mismo álbum
+ALBUM_COLLECT_DELAY = 2.5
+
+# ─── Auth ──────────────────────────────────────────────────────────────────────
 
 def is_authorized(user_id: int) -> bool:
     if not ALLOWED_USER_IDS:
         return True
     return user_id in ALLOWED_USER_IDS
 
-# ─── /start ───────────────────────────────────────────────────────────────────
+# ─── /start ────────────────────────────────────────────────────────────────────
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_authorized(update.effective_user.id):
@@ -42,7 +47,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     text = (
         "👋 *Bot de TikTok* listo!\n\n"
-        "📤 Envíame un video y te preguntaré a qué cuenta subirlo.\n\n"
+        "📤 Envíame uno o varios videos (como álbum) y los subiré a TikTok.\n"
+        "Todos los videos del mismo envío usarán el mismo caption.\n\n"
         "Comandos:\n"
         "/cuentas – Ver cuentas conectadas\n"
         "/addcuenta – Conectar nueva cuenta de TikTok\n"
@@ -53,7 +59,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(text, parse_mode="Markdown")
 
-# ─── /cuentas ─────────────────────────────────────────────────────────────────
+# ─── /cuentas ──────────────────────────────────────────────────────────────────
 
 async def cuentas(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_authorized(update.effective_user.id):
@@ -63,9 +69,7 @@ async def cuentas(update: Update, context: ContextTypes.DEFAULT_TYPE):
     selected = tiktok.selected_account
 
     if not accounts:
-        await update.message.reply_text(
-            "No hay cuentas conectadas.\nUsa /addcuenta para agregar una."
-        )
+        await update.message.reply_text("No hay cuentas conectadas.\nUsa /addcuenta para agregar una.")
         return
 
     lines = ["📋 *Cuentas de TikTok conectadas:*\n"]
@@ -76,7 +80,7 @@ async def cuentas(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
 
-# ─── /addcuenta ───────────────────────────────────────────────────────────────
+# ─── /addcuenta ────────────────────────────────────────────────────────────────
 
 async def addcuenta_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_authorized(update.effective_user.id):
@@ -147,7 +151,7 @@ async def cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("❌ Operación cancelada.")
     return ConversationHandler.END
 
-# ─── /seleccionar ─────────────────────────────────────────────────────────────
+# ─── /seleccionar ──────────────────────────────────────────────────────────────
 
 async def seleccionar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_authorized(update.effective_user.id):
@@ -166,10 +170,7 @@ async def seleccionar(update: Update, context: ContextTypes.DEFAULT_TYPE):
             callback_data=f"select_{acc.alias}"
         )])
 
-    await update.message.reply_text(
-        "¿A qué cuenta quieres cambiar?",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    await update.message.reply_text("¿A qué cuenta quieres cambiar?", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def seleccionar_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -178,14 +179,11 @@ async def seleccionar_callback(update: Update, context: ContextTypes.DEFAULT_TYP
     alias = query.data.replace("select_", "")
     if tiktok.select_account(alias):
         acc = tiktok.get_account(alias)
-        await query.edit_message_text(
-            f"✅ Cuenta activa: `{alias}` (@{acc.username})",
-            parse_mode="Markdown"
-        )
+        await query.edit_message_text(f"✅ Cuenta activa: `{alias}` (@{acc.username})", parse_mode="Markdown")
     else:
         await query.edit_message_text("❌ Cuenta no encontrada.")
 
-# ─── /eliminarcuenta ──────────────────────────────────────────────────────────
+# ─── /eliminarcuenta ───────────────────────────────────────────────────────────
 
 async def eliminarcuenta(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_authorized(update.effective_user.id):
@@ -203,10 +201,7 @@ async def eliminarcuenta(update: Update, context: ContextTypes.DEFAULT_TYPE):
             callback_data=f"delete_{acc.alias}"
         )])
 
-    await update.message.reply_text(
-        "¿Qué cuenta quieres eliminar?",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    await update.message.reply_text("¿Qué cuenta quieres eliminar?", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def eliminarcuenta_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -218,7 +213,7 @@ async def eliminarcuenta_callback(update: Update, context: ContextTypes.DEFAULT_
     else:
         await query.edit_message_text("❌ Cuenta no encontrada.")
 
-# ─── /status ──────────────────────────────────────────────────────────────────
+# ─── /status ───────────────────────────────────────────────────────────────────
 
 async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_authorized(update.effective_user.id):
@@ -230,9 +225,7 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not accounts:
             await update.message.reply_text("No hay cuentas. Usa /addcuenta.")
         else:
-            await update.message.reply_text(
-                "No hay cuenta activa. Usa /seleccionar para elegir una."
-            )
+            await update.message.reply_text("No hay cuenta activa. Usa /seleccionar para elegir una.")
         return
 
     icon = "✅" if acc.is_authenticated() else "⚠️ Token expirado"
@@ -241,7 +234,73 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown"
     )
 
-# ─── Video Handler ────────────────────────────────────────────────────────────
+# ─── /caption ──────────────────────────────────────────────────────────────────
+
+async def set_caption_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Start conversation to set a saved caption for upcoming videos."""
+    if not is_authorized(update.effective_user.id):
+        return
+
+    # If caption passed inline: /caption Mi texto aquí
+    if context.args:
+        caption = " ".join(context.args)
+        context.user_data["saved_caption"] = caption
+        await update.message.reply_text(
+            f"✅ Caption guardado:\n_{caption}_\n\n"
+            "Ahora reenvía los videos y se aplicará automáticamente.\n"
+            "Usa /clearcaption para borrarlo.",
+            parse_mode="Markdown"
+        )
+        return ConversationHandler.END
+
+    # Otherwise ask for it
+    current = context.user_data.get("saved_caption")
+    current_text = f"\n\nCaption actual: _{current}_" if current else ""
+    await update.message.reply_text(
+        f"Escribe el caption que quieres aplicar a los próximos videos:{current_text}\n\n"
+        "_(Escribe /cancelar para salir)_",
+        parse_mode="Markdown"
+    )
+    return WAITING_CAPTION
+
+async def set_caption_receive(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    caption = update.message.text.strip()
+    if not caption:
+        await update.message.reply_text("⚠️ El caption no puede estar vacío.")
+        return WAITING_CAPTION
+
+    context.user_data["saved_caption"] = caption
+    await update.message.reply_text(
+        f"✅ Caption guardado:\n_{caption}_\n\n"
+        "Ahora reenvía los videos y se aplicará automáticamente.\n"
+        "Usa /clearcaption para borrarlo.",
+        parse_mode="Markdown"
+    )
+    return ConversationHandler.END
+
+async def clear_caption(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Clear the saved caption."""
+    if not is_authorized(update.effective_user.id):
+        return
+    context.user_data.pop("saved_caption", None)
+    await update.message.reply_text("🗑 Caption borrado. Los próximos videos se subirán sin descripción.")
+
+async def show_caption(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show the currently saved caption."""
+    if not is_authorized(update.effective_user.id):
+        return
+    caption = context.user_data.get("saved_caption")
+    if caption:
+        await update.message.reply_text(
+            f"📝 Caption activo:\n_{caption}_\n\nUsa /clearcaption para borrarlo.",
+            parse_mode="Markdown"
+        )
+    else:
+        await update.message.reply_text(
+            "No hay caption guardado.\nUsa /caption para establecer uno."
+        )
+
+# ─── Video Handler (con soporte para álbumes) ──────────────────────────────────
 
 async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_authorized(update.effective_user.id):
@@ -250,11 +309,10 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     video = update.message.video or update.message.document
     if not video:
-        await update.message.reply_text("⚠️ Por favor envía un archivo de video.")
         return
 
     if hasattr(video, 'file_size') and video.file_size and video.file_size > 50 * 1024 * 1024:
-        await update.message.reply_text("⚠️ El video es demasiado grande. Máximo 50MB via Telegram.")
+        await update.message.reply_text("⚠️ Video demasiado grande. Máximo 50MB via Telegram.")
         return
 
     accounts = tiktok.list_accounts()
@@ -262,17 +320,67 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("No hay cuentas conectadas. Usa /addcuenta.")
         return
 
-    caption = update.message.caption or ""
-    context.user_data["pending_video_caption"] = caption
+    # ── Resolver caption: mensaje > álbum en curso > /caption guardado ──
+    media_group_id = update.message.media_group_id
+    caption = (
+        update.message.caption                          # caption del mensaje
+        or context.user_data.get("album_caption", "")  # álbum en curso
+        or context.user_data.get("saved_caption", "")  # guardado con /caption
+    )
 
-    # If only one account or one already selected → upload directly
+    if media_group_id:
+        # Inicializar buffer del álbum
+        if "album_videos" not in context.user_data:
+            context.user_data["album_videos"]  = []
+            context.user_data["album_caption"] = caption
+
+        context.user_data["album_videos"].append(video.file_id)
+
+        # Cancelar timer anterior si existe
+        if "album_task" in context.user_data:
+            context.user_data["album_task"].cancel()
+
+        # Programar procesamiento tras el delay (espera a que lleguen todos los videos)
+        loop = asyncio.get_event_loop()
+        task = loop.create_task(
+            _delayed_album_process(update, context, ALBUM_COLLECT_DELAY)
+        )
+        context.user_data["album_task"] = task
+
+    else:
+        # Video único — procesar inmediatamente
+        await _ask_account_and_upload(update, context, [video.file_id], caption)
+
+
+async def _delayed_album_process(update: Update, context: ContextTypes.DEFAULT_TYPE, delay: float):
+    """Wait for all album messages to arrive, then ask which account to use."""
+    await asyncio.sleep(delay)
+
+    file_ids = context.user_data.pop("album_videos", [])
+    caption  = context.user_data.pop("album_caption", "")
+    context.user_data.pop("album_task", None)
+
+    if file_ids:
+        await _ask_account_and_upload(update, context, file_ids, caption)
+
+
+async def _ask_account_and_upload(update: Update, context: ContextTypes.DEFAULT_TYPE, file_ids: list, caption: str):
+    """Show account selector or upload directly if only one account."""
+    accounts = tiktok.list_accounts()
+
+    count_text = f"{len(file_ids)} video{'s' if len(file_ids) > 1 else ''}"
+
     if len(accounts) == 1:
-        await _do_upload(update, context, accounts[0].alias, caption, video)
+        # Solo una cuenta → subir directo
+        await _do_upload_batch(update, context, accounts[0].alias, file_ids, caption)
         return
 
-    # Ask which account to use
-    keyboard = []
+    # Guardar datos pendientes
+    context.user_data["pending_file_ids"] = file_ids
+    context.user_data["pending_caption"]  = caption
+
     selected = tiktok.selected_account
+    keyboard = []
     for acc in accounts:
         icon = "⭐" if selected and selected.alias == acc.alias else "📱"
         keyboard.append([InlineKeyboardButton(
@@ -280,84 +388,94 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
             callback_data=f"upload_{acc.alias}"
         )])
 
-    # Store file_id to retrieve later
-    context.user_data["pending_video_file_id"] = video.file_id
-    context.user_data["pending_video_is_doc"] = update.message.document is not None
-
     await update.message.reply_text(
-        "¿A qué cuenta de TikTok quieres subir este video?",
+        f"📦 {count_text} recibido{'s' if len(file_ids) > 1 else ''}. ¿A qué cuenta de TikTok quieres subirlo{'s' if len(file_ids) > 1 else ''}?",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
+
 
 async def upload_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    alias   = query.data.replace("upload_", "")
-    caption = context.user_data.pop("pending_video_caption", "")
-    file_id = context.user_data.pop("pending_video_file_id", None)
+    alias    = query.data.replace("upload_", "")
+    file_ids = context.user_data.pop("pending_file_ids", [])
+    caption  = context.user_data.pop("pending_caption", "")
 
-    if not file_id:
-        await query.edit_message_text("❌ No se encontró el video. Envíalo de nuevo.")
+    if not file_ids:
+        await query.edit_message_text("❌ No se encontraron los videos. Envíalos de nuevo.")
         return
 
-    await query.edit_message_text(f"⬇️ Descargando video para `{alias}`...", parse_mode="Markdown")
+    await query.edit_message_text(
+        f"⏳ Procesando {len(file_ids)} video{'s' if len(file_ids) > 1 else ''} para `{alias}`...",
+        parse_mode="Markdown"
+    )
 
-    tmp_path = None
-    try:
-        from telegram import Bot
-        bot = query.get_bot()
-        file = await bot.get_file(file_id)
+    await _do_upload_batch(update, context, alias, file_ids, caption, status_msg=query.message)
 
-        with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp:
-            tmp_path = tmp.name
-        await file.download_to_drive(tmp_path)
 
-        await query.edit_message_text(f"⬆️ Subiendo a TikTok cuenta `{alias}`...", parse_mode="Markdown")
+async def _do_upload_batch(update, context, alias: str, file_ids: list, caption: str, status_msg=None):
+    """Download and upload all videos in the batch sequentially."""
+    bot       = update.get_bot()
+    total     = len(file_ids)
+    acc       = tiktok.get_account(alias)
+    acc_name  = f"@{acc.username}" if acc else alias
+    results   = []
 
-        result = await tiktok.upload_video(tmp_path, alias=alias, caption=caption)
-
-        acc = tiktok.get_account(alias)
-        name = f"@{acc.username}" if acc else alias
-
-        if result["success"]:
-            await query.edit_message_text(
-                f"✅ ¡Video subido a {name} exitosamente!\n"
-                f"🎵 Puede tardar unos minutos en aparecer."
-            )
+    async def send(text):
+        if status_msg:
+            await status_msg.edit_text(text, parse_mode="Markdown")
         else:
-            await query.edit_message_text(f"❌ Error: {result.get('error', 'Error desconocido')}")
+            await update.message.reply_text(text, parse_mode="Markdown")
 
-    except Exception as e:
-        logger.error(f"Upload error: {e}")
-        await query.edit_message_text(f"❌ Error inesperado: {str(e)}")
-    finally:
-        if tmp_path and os.path.exists(tmp_path):
-            os.unlink(tmp_path)
+    await send(f"⬇️ Descargando {total} video{'s' if total > 1 else ''} para `{alias}`...")
 
-async def _do_upload(update, context, alias, caption, video):
-    """Direct upload when only one account exists."""
-    msg = await update.message.reply_text("⬇️ Descargando video...")
-    tmp_path = None
-    try:
-        file = await video.get_file()
-        with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp:
-            tmp_path = tmp.name
-        await file.download_to_drive(tmp_path)
-        await msg.edit_text("⬆️ Subiendo a TikTok...")
+    for i, file_id in enumerate(file_ids, 1):
+        tmp_path = None
+        try:
+            await send(f"⬆️ Subiendo video {i}/{total} a `{alias}`...")
 
-        result = await tiktok.upload_video(tmp_path, alias=alias, caption=caption)
-        if result["success"]:
-            await msg.edit_text("✅ ¡Video subido exitosamente!\n🎵 Puede tardar unos minutos en aparecer.")
-        else:
-            await msg.edit_text(f"❌ Error: {result.get('error')}")
-    except Exception as e:
-        await msg.edit_text(f"❌ Error inesperado: {str(e)}")
-    finally:
-        if tmp_path and os.path.exists(tmp_path):
-            os.unlink(tmp_path)
+            file = await bot.get_file(file_id)
+            with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp:
+                tmp_path = tmp.name
+            await file.download_to_drive(tmp_path)
 
-# ─── /help ────────────────────────────────────────────────────────────────────
+            result = await tiktok.upload_video(tmp_path, alias=alias, caption=caption)
+            results.append(result)
+
+        except Exception as e:
+            logger.error(f"Error uploading video {i}: {e}")
+            results.append({"success": False, "error": str(e)})
+        finally:
+            if tmp_path and os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+
+    # ── Resumen final ──
+    ok      = sum(1 for r in results if r.get("success"))
+    failed  = total - ok
+
+    if failed == 0:
+        msg = (
+            f"✅ {ok}/{total} video{'s' if ok > 1 else ''} subido{'s' if ok > 1 else ''} "
+            f"a {acc_name} exitosamente!\n"
+            f"🎵 Puede tardar unos minutos en aparecer."
+        )
+    elif ok == 0:
+        errors = "\n".join(f"• Video {i+1}: {r.get('error')}" for i, r in enumerate(results))
+        msg = f"❌ Todos los videos fallaron:\n{errors}"
+    else:
+        errors = "\n".join(
+            f"• Video {i+1}: {r.get('error')}"
+            for i, r in enumerate(results) if not r.get("success")
+        )
+        msg = (
+            f"⚠️ {ok}/{total} videos subidos a {acc_name}.\n"
+            f"Fallaron:\n{errors}"
+        )
+
+    await send(msg)
+
+# ─── /help ─────────────────────────────────────────────────────────────────────
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
@@ -369,24 +487,37 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/eliminarcuenta – Eliminar una cuenta\n"
         "/status – Ver cuenta activa\n\n"
         "*Subir videos:*\n"
-        "Simplemente envía un video. Si tienes varias cuentas, "
-        "el bot te preguntará a cuál subirlo.\n\n"
+        "• Envía un video solo → se sube directamente\n"
+        "• Envía varios videos a la vez (álbum) → se suben todos con el mismo caption\n"
+        "• Reenvía videos de otro chat → usa /caption antes para aplicar descripción\n"
+        "• Si tienes varias cuentas, el bot te pregunta a cuál subirlos\n\n"
+        "*Caption para videos reenviados:*\n"
+        "/caption TEXTO – Guardar caption para próximos videos\n"
+        "/mycaption – Ver caption activo\n"
+        "/clearcaption – Borrar caption guardado\n\n"
         "*Formatos:* MP4, MOV, AVI\n"
-        "*Tamaño máximo:* 50MB"
+        "*Tamaño máximo:* 50MB por video"
     )
     await update.message.reply_text(text, parse_mode="Markdown")
 
-# ─── Main ─────────────────────────────────────────────────────────────────────
+# ─── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
     app = Application.builder().token(TELEGRAM_TOKEN).build()
 
-    # ConversationHandler para agregar cuenta
-    conv = ConversationHandler(
+    conv_cuenta = ConversationHandler(
         entry_points=[CommandHandler("addcuenta", addcuenta_start)],
         states={
             WAITING_ALIAS: [MessageHandler(filters.TEXT & ~filters.COMMAND, addcuenta_alias)],
             WAITING_CODE:  [MessageHandler(filters.TEXT & ~filters.COMMAND, addcuenta_code)],
+        },
+        fallbacks=[CommandHandler("cancelar", cancelar)],
+    )
+
+    conv_caption = ConversationHandler(
+        entry_points=[CommandHandler("caption", set_caption_start)],
+        states={
+            WAITING_CAPTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, set_caption_receive)],
         },
         fallbacks=[CommandHandler("cancelar", cancelar)],
     )
@@ -396,14 +527,17 @@ def main():
     app.add_handler(CommandHandler("seleccionar", seleccionar))
     app.add_handler(CommandHandler("eliminarcuenta", eliminarcuenta))
     app.add_handler(CommandHandler("status", status))
+    app.add_handler(CommandHandler("mycaption", show_caption))
+    app.add_handler(CommandHandler("clearcaption", clear_caption))
     app.add_handler(CommandHandler("help", help_command))
-    app.add_handler(conv)
+    app.add_handler(conv_cuenta)
+    app.add_handler(conv_caption)
     app.add_handler(CallbackQueryHandler(seleccionar_callback, pattern="^select_"))
     app.add_handler(CallbackQueryHandler(eliminarcuenta_callback, pattern="^delete_"))
     app.add_handler(CallbackQueryHandler(upload_callback, pattern="^upload_"))
     app.add_handler(MessageHandler(filters.VIDEO | filters.Document.VIDEO, handle_video))
 
-    logger.info("🤖 Bot iniciado con soporte multi-cuenta...")
+    logger.info("🤖 Bot iniciado con soporte multi-cuenta y multi-video...")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
