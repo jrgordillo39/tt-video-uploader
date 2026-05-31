@@ -4,6 +4,9 @@ import time
 import logging
 import httpx
 import asyncio
+import hashlib
+import secrets
+import base64
 from pathlib import Path
 from urllib.parse import urlencode
 
@@ -97,28 +100,54 @@ class TikTokUploader:
             return TikTokAccount(alias, self._accounts[alias])
         return None
 
+    # ─── PKCE Helpers ─────────────────────────────────────────────────────────
+
+    def _generate_pkce(self) -> tuple[str, str]:
+        """Generate a PKCE code_verifier and its SHA256 code_challenge."""
+        code_verifier  = secrets.token_urlsafe(64)
+        digest         = hashlib.sha256(code_verifier.encode()).digest()
+        code_challenge = base64.urlsafe_b64encode(digest).rstrip(b"=").decode()
+        return code_verifier, code_challenge
+
     # ─── OAuth Flow ───────────────────────────────────────────────────────────
 
     def get_auth_url(self, alias: str) -> str:
-        """Generate OAuth URL. alias is stored in `state` to identify the account."""
+        """Generate OAuth URL with PKCE. Stores verifier for later use."""
+        code_verifier, code_challenge = self._generate_pkce()
+
+        # Store verifier keyed by alias so exchange_code can retrieve it
+        if not hasattr(self, "_pkce_verifiers"):
+            self._pkce_verifiers = {}
+        self._pkce_verifiers[alias] = code_verifier
+
         params = {
-            "client_key":    self.client_key,
-            "scope":         "user.info.basic,video.publish,video.upload",
-            "response_type": "code",
-            "redirect_uri":  self.redirect_uri,
-            "state":         f"tgbot_{alias}",
+            "client_key":            self.client_key,
+            "scope":                 "user.info.basic,video.publish,video.upload",
+            "response_type":         "code",
+            "redirect_uri":          self.redirect_uri,
+            "state":                 f"tgbot_{alias}",
+            "code_challenge":        code_challenge,
+            "code_challenge_method": "S256",
         }
         return f"{self.AUTH_URL}?{urlencode(params)}"
 
     def exchange_code(self, code: str, alias: str) -> bool:
         """Exchange OAuth code for access token and save under alias."""
-        resp = httpx.post(self.TOKEN_URL, data={
+        # Retrieve PKCE verifier generated during get_auth_url
+        verifiers     = getattr(self, "_pkce_verifiers", {})
+        code_verifier = verifiers.pop(alias, None)
+
+        payload = {
             "client_key":    self.client_key,
             "client_secret": self.client_secret,
             "code":          code,
             "grant_type":    "authorization_code",
             "redirect_uri":  self.redirect_uri,
-        })
+        }
+        if code_verifier:
+            payload["code_verifier"] = code_verifier
+
+        resp = httpx.post(self.TOKEN_URL, data=payload)
 
         if resp.status_code != 200 or "access_token" not in resp.json():
             logger.error(f"Code exchange failed: {resp.text}")
