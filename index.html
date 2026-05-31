@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Inicio — TikTok Bot</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --bg: #0a0a0f;
+                --surface: #111118;
+                --border: #1e1e2e;
+                --accent: #ff2d55;
+                --accent2: #ff6b35;
+                --text: #e8e8f0;
+                --muted: #6b6b80;
+                --heading: #ffffff;
+            }
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+            html {
+                scroll-behavior: smooth;
+            }
+            body {
+                background: var(--bg);
+                color: var(--text);
+                font-family: 'DM Sans', sans-serif;
+                font-size: 16px;
+                line-height: 1.75;
+                min-height: 100vh;
+            }
+            body::before {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background:
+                    radial-gradient(ellipse 80% 50% at 10% 0%, rgba(255, 45, 85, 0.08) 0%, transparent 60%),
+                    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(255, 107, 53, 0.06) 0%, transparent 55%);
+                pointer-events: none;
+                z-index: 0;
+            }
+            header {
+                position: relative;
+                z-index: 1;
+                border-bottom: 1px solid var(--border);
+                padding: 2.5rem clamp(1.5rem, 6vw, 8rem);
+                display: flex;
+                align-items: center;
+                gap: 1.25rem;
+            }
+            .logo {
+                width: 42px;
+                height: 42px;
+                background: linear-gradient(135deg, var(--accent), var(--accent2));
+                border-radius: 10px;
+                display: grid;
+                place-items: center;
+                font-size: 1.2rem;
+                flex-shrink: 0;
+            }
+            .header-text h1 {
+                font-family: 'Syne', sans-serif;
+                font-size: 1rem;
+                font-weight: 700;
+                color: var(--heading);
+                letter-spacing: 0.02em;
+            }
+            .header-text p {
+                font-size: 0.8rem;
+                color: var(--muted);
+            }
+            .container {
+                position: relative;
+                z-index: 1;
+                max-width: 780px;
+                margin: 0 auto;
+                padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 5vw, 2rem);
+            }
+            .hero {
+                margin-bottom: 4rem;
+                padding-bottom: 3rem;
+                border-bottom: 1px solid var(--border);
+                text-align: center;
+            }
+            .tag {
+                display: inline-block;
+                font-family: 'Syne', sans-serif;
+                font-size: 0.7rem;
+                font-weight: 700;
+                letter-spacing: 0.15em;
+                text-transform: uppercase;
+                color: var(--accent);
+                border: 1px solid rgba(255, 45, 85, 0.3);
+                padding: 0.3rem 0.8rem;
+                border-radius: 2rem;
+                margin-bottom: 1.5rem;
+            }
+            .hero h2 {
+                font-family: 'Syne', sans-serif;
+                font-size: clamp(2.2rem, 5vw, 3.5rem);
+                font-weight: 800;
+                color: var(--heading);
+                line-height: 1.1;
+                margin-bottom: 1.2rem;
+            }
+            .hero h2 span {
+                background: linear-gradient(90deg, var(--accent), var(--accent2));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+            .hero p {
+                color: var(--muted);
+                font-size: 1.1rem;
+                max-width: 520px;
+                margin: 0 auto 1.5rem auto;
+            }
+            .cta-btn {
+                display: inline-block;
+                margin-top: 2.2rem;
+                padding: 0.9rem 2.2rem;
+                font-family: 'Syne', sans-serif;
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: #fff;
+                background: linear-gradient(90deg, var(--accent), var(--accent2));
+                border: none;
+                border-radius: 2rem;
+                cursor: pointer;
+                text-decoration: none;
+                transition: filter 0.18s;
+                box-shadow: 0 2px 16px 0 rgba(255, 45, 85, 0.08);
+            }
+            .cta-btn:hover {
+                filter: brightness(1.1);
+            }
+            .features {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 2rem;
+                margin-top: 3.5rem;
+                margin-bottom: 3rem;
+            }
+            .feature {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 2rem 1.5rem;
+                text-align: center;
+                animation: fadeUp 0.5s ease both;
+            }
+            .feature-icon {
+                font-size: 2.2rem;
+                margin-bottom: 1.1rem;
+            }
+            .feature-title {
+                font-family: 'Syne', sans-serif;
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: var(--heading);
+                margin-bottom: 0.7rem;
+            }
+            .feature-desc {
+                color: var(--text);
+                font-size: 0.97rem;
+            }
+            @keyframes fadeUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(16px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            footer {
+                position: relative;
+                z-index: 1;
+                border-top: 1px solid var(--border);
+                padding: 2.5rem clamp(1.5rem, 6vw, 8rem);
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1rem;
+                align-items: center;
+                justify-content: space-between;
+            }
+            footer p {
+                font-size: 0.82rem;
+                color: var(--muted);
+            }
+            footer a {
+                color: var(--accent);
+                text-decoration: none;
+                font-size: 0.82rem;
+                font-weight: 500;
+            }
+            footer a:hover {
+                text-decoration: underline;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <div class="logo">🎬</div>
+            <div class="header-text">
+                <h1>TikTok Upload Bot</h1>
+                <p>Sube videos a TikTok desde Telegram</p>
+            </div>
+        </header>
+        <main class="container">
+            <div class="hero">
+                <span class="tag">Inicio</span>
+                <h2>Sube videos a<br /><span>TikTok desde Telegram</span></h2>
+                <p>
+                    Conecta tu cuenta de TikTok y sube videos fácilmente usando tu bot de Telegram. Seguro, privado y
+                    sin complicaciones.
+                </p>
+                <a class="cta-btn" href="https://t.me/TuBotDeTikTok">Empezar en Telegram</a>
+            </div>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🔒</div>
+                    <div class="feature-title">Privacidad primero</div>
+                    <div class="feature-desc">
+                        Tus tokens y videos no se comparten ni venden. Eliminación automática tras subir el video.
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-title">Rápido y sencillo</div>
+                    <div class="feature-desc">
+                        Envía tu video al bot y estará en TikTok en segundos. Sin pasos complicados.
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🤖</div>
+                    <div class="feature-title">100% automatizado</div>
+                    <div class="feature-desc">
+                        No necesitas instalar nada extra. Todo funciona desde Telegram y la nube.
+                    </div>
+                </div>
+            </div>
+            <section class="doc-section" style="margin-top: 3.5rem">
+                <h2
+                    style="
+                        font-family: 'Syne', sans-serif;
+                        font-size: 1.5rem;
+                        font-weight: 800;
+                        color: var(--heading);
+                        margin-bottom: 1.2rem;
+                        text-align: center;
+                    "
+                >
+                    Guía rápida
+                </h2>
+                <div style="max-width: 700px; margin: 0 auto">
+                    <h3
+                        style="
+                            font-family: 'Syne', sans-serif;
+                            font-size: 1.1rem;
+                            font-weight: 700;
+                            color: var(--accent);
+                            margin-bottom: 0.7rem;
+                        "
+                    >
+                        ¿Qué es?
+                    </h3>
+                    <p>Bot de Telegram que recibe videos y los sube automáticamente a TikTok.</p>
+
+                    <h3
+                        style="
+                            font-family: 'Syne', sans-serif;
+                            font-size: 1.1rem;
+                            font-weight: 700;
+                            color: var(--accent);
+                            margin: 1.5rem 0 0.7rem 0;
+                        "
+                    >
+                        Requisitos
+                    </h3>
+                    <ul class="clean">
+                        <li>Python 3.10+</li>
+                        <li>Cuenta de Telegram</li>
+                        <li>Cuenta de TikTok Developer</li>
+                    </ul>
+
+                    <h3
+                        style="
+                            font-family: 'Syne', sans-serif;
+                            font-size: 1.1rem;
+                            font-weight: 700;
+                            color: var(--accent);
+                            margin: 1.5rem 0 0.7rem 0;
+                        "
+                    >
+                        ¿Cómo funciona?
+                    </h3>
+                    <ol style="margin-left: 1.2rem; margin-bottom: 1.2rem">
+                        <li>Inicia el bot con <code>python bot.py</code> o despliega en Railway/Render.</li>
+                        <li>En Telegram, envía <b>/auth</b> al bot y sigue el proceso de autenticación con TikTok.</li>
+                        <li>Envía cualquier video al bot para subirlo a tu cuenta de TikTok.</li>
+                    </ol>
+
+                    <h3
+                        style="
+                            font-family: 'Syne', sans-serif;
+                            font-size: 1.1rem;
+                            font-weight: 700;
+                            color: var(--accent);
+                            margin: 1.5rem 0 0.7rem 0;
+                        "
+                    >
+                        Configuración rápida
+                    </h3>
+                    <ul class="clean">
+                        <li>Clona el proyecto y ejecuta <code>pip install -r requirements.txt</code></li>
+                        <li>Configura tus credenciales en el archivo <code>.env</code></li>
+                        <li>Obtén tu <b>Telegram Bot Token</b> con @BotFather</li>
+                        <li>
+                            Registra tu app en
+                            <a href="https://developers.tiktok.com" target="_blank">TikTok Developers</a> y copia los
+                            datos a <code>.env</code>
+                        </li>
+                    </ul>
+
+                    <h3
+                        style="
+                            font-family: 'Syne', sans-serif;
+                            font-size: 1.1rem;
+                            font-weight: 700;
+                            color: var(--accent);
+                            margin: 1.5rem 0 0.7rem 0;
+                        "
+                    >
+                        Notas importantes
+                    </h3>
+                    <ul class="clean">
+                        <li>La API de TikTok requiere que tu app sea aprobada para uso público.</li>
+                        <li>Durante el desarrollo, solo el dueño de la app puede usarla.</li>
+                        <li>El tamaño máximo de video por Telegram es <b>50MB</b>.</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+        <footer>
+            <p>© 2026 TikTok Upload Bot. Todos los derechos reservados.</p>
+            <div>
+                <a href="terms.html">Términos y Condiciones</a> ·
+                <a href="privacy.html">Política de Privacidad</a>
+            </div>
+        </footer>
+    </body>
+</html>

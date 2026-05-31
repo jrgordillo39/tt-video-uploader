@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Términos y Condiciones — TikTok Bot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #0a0a0f;
+      --surface:  #111118;
+      --border:   #1e1e2e;
+      --accent:   #ff2d55;
+      --accent2:  #ff6b35;
+      --text:     #e8e8f0;
+      --muted:    #6b6b80;
+      --heading:  #ffffff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.75;
+      min-height: 100vh;
+    }
+
+    /* ── Background texture ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 10% 0%, rgba(255,45,85,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 90% 100%, rgba(255,107,53,0.06) 0%, transparent 55%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Header ── */
+    header {
+      position: relative;
+      z-index: 1;
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem clamp(1.5rem, 6vw, 8rem);
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .header-text h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--heading);
+      letter-spacing: 0.02em;
+    }
+
+    .header-text p {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    /* ── Layout ── */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 5vw, 2rem);
+    }
+
+    /* ── Hero ── */
+    .hero {
+      margin-bottom: 4rem;
+      padding-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tag {
+      display: inline-block;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid rgba(255,45,85,0.3);
+      padding: 0.3rem 0.8rem;
+      border-radius: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      color: var(--heading);
+      line-height: 1.1;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h2 span {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      max-width: 520px;
+    }
+
+    .updated {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 1.2rem;
+    }
+
+    .updated::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: #22c55e;
+      border-radius: 50%;
+    }
+
+    /* ── Sections ── */
+    .section {
+      margin-bottom: 3rem;
+      padding: 2rem 2rem 2rem 2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .section::before {
+      content: attr(data-num);
+      position: absolute;
+      top: -0.5rem;
+      right: 1.5rem;
+      font-family: 'Syne', sans-serif;
+      font-size: 5rem;
+      font-weight: 800;
+      color: rgba(255,255,255,0.03);
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .section:nth-child(odd) { animation-delay: 0.05s; }
+    .section:nth-child(even) { animation-delay: 0.1s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-icon {
+      font-size: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .section h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--heading);
+      margin-bottom: 1rem;
+      letter-spacing: 0.01em;
+    }
+
+    .section p {
+      color: var(--text);
+      font-size: 0.92rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .section p:last-child { margin-bottom: 0; }
+
+    ul.clean {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0;
+    }
+
+    ul.clean li {
+      font-size: 0.92rem;
+      color: var(--text);
+      padding: 0.35rem 0 0.35rem 1.4rem;
+      position: relative;
+    }
+
+    ul.clean li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-size: 0.85rem;
+    }
+
+    .highlight-box {
+      background: rgba(255,45,85,0.07);
+      border: 1px solid rgba(255,45,85,0.2);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-top: 1rem;
+      font-size: 0.88rem;
+      color: var(--text);
+    }
+
+    /* ── Footer ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 2.5rem clamp(1.5rem, 6vw, 8rem);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    footer p {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🤖</div>
+  <div class="header-text">
+    <h1>TikTok Upload Bot</h1>
+    <p>Documentación legal</p>
+  </div>
+</header>
+
+<main class="container">
+
+  <div class="hero">
+    <span class="tag">Legal</span>
+    <h2>Términos y<br><span>Condiciones</span></h2>
+    <p>Al usar este bot de Telegram aceptas los siguientes términos. Léelos con atención antes de continuar.</p>
+    <span class="updated">Última actualización: Mayo 2026</span>
+  </div>
+
+  <div class="section" data-num="01">
+    <div class="section-icon">📋</div>
+    <h3>1. Descripción del servicio</h3>
+    <p>TikTok Upload Bot es una herramienta de uso personal que permite subir videos a TikTok mediante un bot de Telegram. El servicio actúa como intermediario entre Telegram y la API oficial de TikTok.</p>
+    <p>El uso del bot implica también el cumplimiento de los Términos de Servicio de Telegram y de TikTok.</p>
+  </div>
+
+  <div class="section" data-num="02">
+    <div class="section-icon">✅</div>
+    <h3>2. Uso aceptable</h3>
+    <p>Al usar este bot, te comprometes a:</p>
+    <ul class="clean">
+      <li>Subir únicamente contenido del que seas propietario o tengas los derechos necesarios</li>
+      <li>No utilizar el bot para distribuir contenido ilegal, ofensivo, o que viole derechos de terceros</li>
+      <li>No intentar acceder a cuentas de otros usuarios sin su consentimiento</li>
+      <li>Cumplir con las políticas de contenido de TikTok en todo momento</li>
+      <li>No usar el bot para actividades de spam o publicación masiva no autorizada</li>
+    </ul>
+  </div>
+
+  <div class="section" data-num="03">
+    <div class="section-icon">🔑</div>
+    <h3>3. Autenticación y credenciales</h3>
+    <p>El bot accede a tu cuenta de TikTok únicamente a través del flujo oficial de OAuth 2.0 proporcionado por TikTok. En ningún momento se solicitan ni almacenan tu contraseña de TikTok.</p>
+    <p>Los tokens de acceso se almacenan localmente en el servidor del bot y se usan exclusivamente para subir videos en tu nombre.</p>
+    <div class="highlight-box">
+      ⚠️ Eres responsable de mantener la confidencialidad de tu token de Telegram y de revocar el acceso desde TikTok si sospechas de un uso no autorizado.
+    </div>
+  </div>
+
+  <div class="section" data-num="04">
+    <div class="section-icon">🎥</div>
+    <h3>4. Contenido publicado</h3>
+    <p>Eres el único responsable del contenido que publicas a través del bot. El operador del bot no revisa, modera ni se hace responsable de los videos subidos a TikTok mediante este servicio.</p>
+    <p>TikTok puede eliminar o restringir contenido que viole sus políticas, independientemente de cómo haya sido subido.</p>
+  </div>
+
+  <div class="section" data-num="05">
+    <div class="section-icon">⚙️</div>
+    <h3>5. Disponibilidad del servicio</h3>
+    <p>El bot se proporciona "tal cual" y sin garantías de disponibilidad continua. El servicio puede interrumpirse por:</p>
+    <ul class="clean">
+      <li>Mantenimiento del servidor</li>
+      <li>Cambios en la API de TikTok o Telegram</li>
+      <li>Causas de fuerza mayor</li>
+    </ul>
+    <p>No nos hacemos responsables de pérdidas derivadas de la interrupción del servicio.</p>
+  </div>
+
+  <div class="section" data-num="06">
+    <div class="section-icon">⚖️</div>
+    <h3>6. Limitación de responsabilidad</h3>
+    <p>El operador del bot no será responsable de daños directos, indirectos o consecuentes derivados del uso o incapacidad de uso del servicio, incluyendo la pérdida de datos o la suspensión de cuentas de TikTok.</p>
+  </div>
+
+  <div class="section" data-num="07">
+    <div class="section-icon">🔄</div>
+    <h3>7. Modificaciones</h3>
+    <p>Estos términos pueden actualizarse en cualquier momento. El uso continuado del bot tras la publicación de cambios implica la aceptación de los nuevos términos.</p>
+  </div>
+
+</main>
+
+<footer>
+  <p>© 2026 TikTok Upload Bot. Todos los derechos reservados.</p>
+  <a href="privacy.html">Política de Privacidad →</a>
+</footer>
+
+</body>
+</html>

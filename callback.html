@@ -1,9 +1,230 @@
 <!doctype html>
-<html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Autorización exitosa — TikTok Bot</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --bg: #06080f;
+                --surface: #0d1018;
+                --border: #181c28;
+                --accent: #4f7cff;
+                --accent2: #a78bfa;
+                --text: #d8dce8;
+                --muted: #5a6075;
+                --heading: #ffffff;
+            }
+
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            html {
+                scroll-behavior: smooth;
+            }
+
+            body {
+                background: var(--bg);
+                color: var(--text);
+                font-family: 'DM Sans', sans-serif;
+                font-size: 16px;
+                line-height: 1.75;
+                min-height: 100vh;
+            }
+
+            body::before {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background:
+                    radial-gradient(ellipse 70% 50% at 90% 10%, rgba(79, 124, 255, 0.09) 0%, transparent 60%),
+                    radial-gradient(ellipse 50% 40% at 0% 90%, rgba(167, 139, 250, 0.06) 0%, transparent 55%);
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            body::after {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background-image:
+                    linear-gradient(rgba(79, 124, 255, 0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(79, 124, 255, 0.03) 1px, transparent 1px);
+                background-size: 40px 40px;
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            header {
+                position: relative;
+                z-index: 1;
+                border-bottom: 1px solid var(--border);
+                padding: 2.5rem clamp(1.5rem, 6vw, 8rem);
+                display: flex;
+                align-items: center;
+                gap: 1.25rem;
+            }
+
+            .logo {
+                width: 42px;
+                height: 42px;
+                background: linear-gradient(135deg, var(--accent), var(--accent2));
+                border-radius: 10px;
+                display: grid;
+                place-items: center;
+                font-size: 1.1rem;
+                flex-shrink: 0;
+            }
+
+            .header-text h1 {
+                font-family: 'Syne', sans-serif;
+                font-size: 1rem;
+                font-weight: 700;
+                color: var(--heading);
+                letter-spacing: 0.02em;
+            }
+
+            .header-text p {
+                font-size: 0.8rem;
+                color: var(--muted);
+            }
+
+            .container {
+                position: relative;
+                z-index: 1;
+                max-width: 520px;
+                margin: 0 auto;
+                padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 5vw, 2rem);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: 60vh;
+            }
+
+            .success-box {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                padding: 2.5rem 2rem 2rem 2rem;
+                box-shadow: 0 2px 16px 0 rgba(79, 124, 255, 0.04);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-bottom: 2.5rem;
+                animation: fadeUp 0.5s ease both;
+            }
+
+            .success-box h2 {
+                font-family: 'Syne', sans-serif;
+                font-size: 2.1rem;
+                font-weight: 800;
+                color: var(--heading);
+                margin-bottom: 0.7rem;
+                text-align: center;
+            }
+
+            .success-box p {
+                color: var(--muted);
+                font-size: 1.05rem;
+                margin-bottom: 1.5rem;
+                text-align: center;
+            }
+
+            .code-box {
+                background: rgba(79, 124, 255, 0.07);
+                border: 1px solid rgba(79, 124, 255, 0.2);
+                border-radius: 8px;
+                padding: 1.2rem 2.2rem;
+                font-family: 'Syne', monospace, monospace;
+                font-size: 2.1rem;
+                font-weight: 700;
+                letter-spacing: 0.18em;
+                color: var(--accent);
+                margin-bottom: 0.5rem;
+                text-align: center;
+                min-width: 220px;
+            }
+
+            .code-desc {
+                font-size: 0.95rem;
+                color: var(--muted);
+                margin-bottom: 0.5rem;
+                text-align: center;
+            }
+
+            @keyframes fadeUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(14px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            footer {
+                position: relative;
+                z-index: 1;
+                border-top: 1px solid var(--border);
+                padding: 2.5rem clamp(1.5rem, 6vw, 8rem);
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1rem;
+                align-items: center;
+                justify-content: space-between;
+                margin-top: 3rem;
+            }
+
+            footer p {
+                font-size: 0.82rem;
+                color: var(--muted);
+            }
+
+            footer a {
+                color: var(--accent);
+                text-decoration: none;
+                font-size: 0.82rem;
+                font-weight: 500;
+            }
+
+            footer a:hover {
+                text-decoration: underline;
+            }
+        </style>
+    </head>
     <body>
-        <h2>Autorización exitosa ✅</h2>
-        <p>Envía este código a tu bot de Telegram:</p>
-        <h1 id="code" style="letter-spacing: 4px"></h1>
+        <header>
+            <div class="logo">✅</div>
+            <div class="header-text">
+                <h1>TikTok Upload Bot</h1>
+                <p>Autorización exitosa</p>
+            </div>
+        </header>
+
+        <main class="container">
+            <div class="success-box">
+                <h2>¡Autorización exitosa!</h2>
+                <p>Envía este código a tu bot de Telegram:</p>
+                <div class="code-box" id="code">...</div>
+                <div class="code-desc">Copia y pégalo en el chat del bot para completar el proceso.</div>
+            </div>
+        </main>
+
+        <footer>
+            <p>© 2026 TikTok Upload Bot. Todos los derechos reservados.</p>
+            <a href="privacy.html">Política de Privacidad</a>
+        </footer>
 
         <script>
             const code = new URLSearchParams(window.location.search).get('code');
