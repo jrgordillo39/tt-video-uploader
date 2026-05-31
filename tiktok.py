@@ -9,121 +9,199 @@ from urllib.parse import urlencode
 
 logger = logging.getLogger(__name__)
 
-TOKEN_FILE = "tiktok_token.json"
+TOKENS_FILE = "tiktok_tokens.json"
+
+class TikTokAccount:
+    """Represents a single authenticated TikTok account."""
+
+    def __init__(self, alias: str, token_data: dict):
+        self.alias = alias
+        self.token_data = token_data
+
+    @property
+    def username(self) -> str:
+        return self.token_data.get("username", self.alias)
+
+    def is_authenticated(self) -> bool:
+        if not self.token_data.get("access_token"):
+            return False
+        return time.time() < self.token_data.get("expires_at", 0)
+
 
 class TikTokUploader:
     """
-    Handles TikTok OAuth2 and video uploads via the Content Posting API.
+    Handles TikTok OAuth2 and video uploads for multiple accounts.
     Docs: https://developers.tiktok.com/doc/content-posting-api-get-started
     """
 
-    AUTH_URL = "https://www.tiktok.com/v2/auth/authorize/"
-    TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/"
+    AUTH_URL      = "https://www.tiktok.com/v2/auth/authorize/"
+    TOKEN_URL     = "https://open.tiktokapis.com/v2/oauth/token/"
+    USERINFO_URL  = "https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,avatar_url"
     UPLOAD_INIT_URL = "https://open.tiktokapis.com/v2/post/publish/video/init/"
-    QUERY_POST_URL = "https://open.tiktokapis.com/v2/post/publish/status/fetch/"
+    QUERY_POST_URL  = "https://open.tiktokapis.com/v2/post/publish/status/fetch/"
 
     def __init__(self):
-        self.client_key = os.getenv("TIKTOK_CLIENT_KEY")
+        self.client_key    = os.getenv("TIKTOK_CLIENT_KEY")
         self.client_secret = os.getenv("TIKTOK_CLIENT_SECRET")
-        self.redirect_uri = os.getenv("TIKTOK_REDIRECT_URI", "https://localhost/callback")
-        self._token_data = self._load_token()
+        self.redirect_uri  = os.getenv("TIKTOK_REDIRECT_URI", "https://localhost/callback")
 
-    # ─── Token Management ─────────────────────────────────────────────────────
+        # { alias -> token_data_dict }
+        self._accounts: dict[str, dict] = self._load_all()
 
-    def _load_token(self) -> dict:
-        if Path(TOKEN_FILE).exists():
-            with open(TOKEN_FILE) as f:
+        # alias of the currently selected account (per-session)
+        self._selected: str | None = None
+
+    # ─── Persistence ──────────────────────────────────────────────────────────
+
+    def _load_all(self) -> dict:
+        if Path(TOKENS_FILE).exists():
+            with open(TOKENS_FILE) as f:
                 return json.load(f)
         return {}
 
-    def _save_token(self, data: dict):
-        self._token_data = data
-        with open(TOKEN_FILE, "w") as f:
-            json.dump(data, f, indent=2)
-        logger.info("Token saved.")
+    def _save_all(self):
+        with open(TOKENS_FILE, "w") as f:
+            json.dump(self._accounts, f, indent=2)
 
-    def is_authenticated(self) -> bool:
-        if not self._token_data.get("access_token"):
-            return False
-        expires_at = self._token_data.get("expires_at", 0)
-        return time.time() < expires_at
+    # ─── Account Management ───────────────────────────────────────────────────
 
-    def _refresh_if_needed(self) -> bool:
-        """Refresh access token using refresh_token if expired."""
-        if self.is_authenticated():
+    def list_accounts(self) -> list[TikTokAccount]:
+        return [TikTokAccount(alias, data) for alias, data in self._accounts.items()]
+
+    def get_account(self, alias: str) -> TikTokAccount | None:
+        data = self._accounts.get(alias)
+        return TikTokAccount(alias, data) if data else None
+
+    def remove_account(self, alias: str) -> bool:
+        if alias in self._accounts:
+            del self._accounts[alias]
+            self._save_all()
+            if self._selected == alias:
+                self._selected = None
             return True
-
-        refresh_token = self._token_data.get("refresh_token")
-        if not refresh_token:
-            return False
-
-        logger.info("Access token expired. Refreshing...")
-        resp = httpx.post(self.TOKEN_URL, data={
-            "client_key": self.client_key,
-            "client_secret": self.client_secret,
-            "grant_type": "refresh_token",
-            "refresh_token": refresh_token,
-        })
-
-        if resp.status_code == 200:
-            data = resp.json()
-            data["expires_at"] = time.time() + data.get("expires_in", 86400)
-            self._save_token(data)
-            return True
-
-        logger.error(f"Token refresh failed: {resp.text}")
         return False
+
+    def select_account(self, alias: str) -> bool:
+        if alias in self._accounts:
+            self._selected = alias
+            return True
+        return False
+
+    @property
+    def selected_account(self) -> TikTokAccount | None:
+        if self._selected and self._selected in self._accounts:
+            return TikTokAccount(self._selected, self._accounts[self._selected])
+        # Auto-select if only one account
+        if len(self._accounts) == 1:
+            alias = next(iter(self._accounts))
+            return TikTokAccount(alias, self._accounts[alias])
+        return None
 
     # ─── OAuth Flow ───────────────────────────────────────────────────────────
 
-    def get_auth_url(self) -> str:
+    def get_auth_url(self, alias: str) -> str:
+        """Generate OAuth URL. alias is stored in `state` to identify the account."""
         params = {
-            "client_key": self.client_key,
-            "scope": "user.info.basic,video.publish,video.upload",
+            "client_key":    self.client_key,
+            "scope":         "user.info.basic,video.publish,video.upload",
             "response_type": "code",
-            "redirect_uri": self.redirect_uri,
-            "state": "telegram_bot",
+            "redirect_uri":  self.redirect_uri,
+            "state":         f"tgbot_{alias}",
         }
         return f"{self.AUTH_URL}?{urlencode(params)}"
 
-    def exchange_code(self, code: str) -> bool:
-        """Exchange OAuth code for access token."""
+    def exchange_code(self, code: str, alias: str) -> bool:
+        """Exchange OAuth code for access token and save under alias."""
         resp = httpx.post(self.TOKEN_URL, data={
-            "client_key": self.client_key,
+            "client_key":    self.client_key,
             "client_secret": self.client_secret,
-            "code": code,
-            "grant_type": "authorization_code",
-            "redirect_uri": self.redirect_uri,
+            "code":          code,
+            "grant_type":    "authorization_code",
+            "redirect_uri":  self.redirect_uri,
         })
 
-        if resp.status_code == 200:
-            data = resp.json()
-            if "access_token" in data:
-                data["expires_at"] = time.time() + data.get("expires_in", 86400)
-                self._save_token(data)
-                return True
+        if resp.status_code != 200 or "access_token" not in resp.json():
+            logger.error(f"Code exchange failed: {resp.text}")
+            return False
 
-        logger.error(f"Code exchange failed: {resp.text}")
+        data = resp.json()
+        data["expires_at"] = time.time() + data.get("expires_in", 86400)
+        data["alias"] = alias
+
+        # Try to fetch TikTok display name
+        display_name = self._fetch_display_name(data["access_token"])
+        if display_name:
+            data["username"] = display_name
+
+        self._accounts[alias] = data
+        self._save_all()
+        logger.info(f"Account '{alias}' authenticated.")
+        return True
+
+    def _fetch_display_name(self, access_token: str) -> str | None:
+        try:
+            resp = httpx.get(
+                self.USERINFO_URL,
+                headers={"Authorization": f"Bearer {access_token}"}
+            )
+            if resp.status_code == 200:
+                return resp.json().get("data", {}).get("user", {}).get("display_name")
+        except Exception:
+            pass
+        return None
+
+    # ─── Token Refresh ────────────────────────────────────────────────────────
+
+    def _refresh_account(self, alias: str) -> bool:
+        data = self._accounts.get(alias, {})
+        if not data:
+            return False
+
+        # Still valid
+        if time.time() < data.get("expires_at", 0):
+            return True
+
+        refresh_token = data.get("refresh_token")
+        if not refresh_token:
+            return False
+
+        logger.info(f"Refreshing token for '{alias}'...")
+        resp = httpx.post(self.TOKEN_URL, data={
+            "client_key":    self.client_key,
+            "client_secret": self.client_secret,
+            "grant_type":    "refresh_token",
+            "refresh_token": refresh_token,
+        })
+
+        if resp.status_code == 200 and "access_token" in resp.json():
+            new_data = {**data, **resp.json()}
+            new_data["expires_at"] = time.time() + new_data.get("expires_in", 86400)
+            self._accounts[alias] = new_data
+            self._save_all()
+            return True
+
+        logger.error(f"Token refresh failed for '{alias}': {resp.text}")
         return False
 
     # ─── Video Upload ─────────────────────────────────────────────────────────
 
-    async def upload_video(self, video_path: str, caption: str = "") -> dict:
-        """
-        Upload video to TikTok using the FILE_UPLOAD method.
-        Returns dict with 'success' bool and optionally 'error' or 'publish_id'.
-        """
-        if not self._refresh_if_needed():
-            return {"success": False, "error": "No autenticado. Usa /auth"}
+    async def upload_video(self, video_path: str, alias: str, caption: str = "") -> dict:
+        """Upload video to TikTok for a specific account alias."""
+        if not self._refresh_account(alias):
+            return {"success": False, "error": f"Cuenta '{alias}' no autenticada o token expirado."}
 
-        access_token = self._token_data["access_token"]
+        access_token = self._accounts[alias]["access_token"]
         file_size = Path(video_path).stat().st_size
 
-        # Step 1: Initialize upload
+        # Step 1: Init upload
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json; charset=UTF-8",
+        }
         init_payload = {
             "post_info": {
                 "title": caption[:2200] if caption else "📱 Subido con TikTok Bot",
-                "privacy_level": "SELF_ONLY",  # Change to PUBLIC_TO_EVERYONE when ready
+                "privacy_level": "SELF_ONLY",
                 "disable_duet": False,
                 "disable_comment": False,
                 "disable_stitch": False,
@@ -136,86 +214,60 @@ class TikTokUploader:
             }
         }
 
-        headers = {
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/json; charset=UTF-8",
-        }
-
         async with httpx.AsyncClient(timeout=60) as client:
-            init_resp = await client.post(
-                self.UPLOAD_INIT_URL,
-                json=init_payload,
-                headers=headers
-            )
+            init_resp = await client.post(self.UPLOAD_INIT_URL, json=init_payload, headers=headers)
 
         if init_resp.status_code != 200:
-            logger.error(f"Init upload failed: {init_resp.text}")
             return {"success": False, "error": f"Error al inicializar upload: {init_resp.text}"}
 
-        init_data = init_resp.json().get("data", {})
+        init_data  = init_resp.json().get("data", {})
         upload_url = init_data.get("upload_url")
         publish_id = init_data.get("publish_id")
 
         if not upload_url:
             return {"success": False, "error": "No se recibió upload_url de TikTok"}
 
-        # Step 2: Upload video bytes
-        logger.info(f"Uploading video to TikTok: {video_path}")
+        # Step 2: Upload bytes
         with open(video_path, "rb") as f:
             video_bytes = f.read()
-
-        upload_headers = {
-            "Content-Type": "video/mp4",
-            "Content-Range": f"bytes 0-{file_size - 1}/{file_size}",
-            "Content-Length": str(file_size),
-        }
 
         async with httpx.AsyncClient(timeout=120) as client:
             upload_resp = await client.put(
                 upload_url,
                 content=video_bytes,
-                headers=upload_headers
+                headers={
+                    "Content-Type": "video/mp4",
+                    "Content-Range": f"bytes 0-{file_size - 1}/{file_size}",
+                    "Content-Length": str(file_size),
+                }
             )
 
         if upload_resp.status_code not in (200, 201, 204):
-            logger.error(f"Video upload failed: {upload_resp.text}")
             return {"success": False, "error": f"Error al subir video: {upload_resp.status_code}"}
 
-        # Step 3: Poll for publish status
-        logger.info(f"Video uploaded. Polling publish status for: {publish_id}")
-        status = await self._poll_publish_status(access_token, publish_id)
-
-        return status
+        # Step 3: Poll status
+        return await self._poll_publish_status(access_token, publish_id)
 
     async def _poll_publish_status(self, access_token: str, publish_id: str, max_tries: int = 10) -> dict:
-        """Poll TikTok until video is published or fails."""
         headers = {
             "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json; charset=UTF-8",
         }
-
         for attempt in range(max_tries):
-            await asyncio.sleep(5)  # wait 5s between polls
-
+            await asyncio.sleep(5)
             async with httpx.AsyncClient(timeout=30) as client:
-                resp = await client.post(
-                    self.QUERY_POST_URL,
-                    json={"publish_id": publish_id},
-                    headers=headers
-                )
+                resp = await client.post(self.QUERY_POST_URL, json={"publish_id": publish_id}, headers=headers)
 
             if resp.status_code != 200:
                 continue
 
-            data = resp.json().get("data", {})
-            process_status = data.get("status")
+            data   = resp.json().get("data", {})
+            status = data.get("status")
+            logger.info(f"Publish status [{attempt+1}/{max_tries}]: {status}")
 
-            logger.info(f"Publish status [{attempt+1}/{max_tries}]: {process_status}")
-
-            if process_status == "PUBLISH_COMPLETE":
+            if status == "PUBLISH_COMPLETE":
                 return {"success": True, "publish_id": publish_id}
-            elif process_status in ("FAILED", "PUBLISH_FAILED"):
-                fail_reason = data.get("fail_reason", "Unknown")
-                return {"success": False, "error": f"TikTok rechazó el video: {fail_reason}"}
+            elif status in ("FAILED", "PUBLISH_FAILED"):
+                return {"success": False, "error": f"TikTok rechazó el video: {data.get('fail_reason', 'Unknown')}"}
 
         return {"success": True, "publish_id": publish_id, "note": "Publicación en proceso"}
