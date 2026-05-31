@@ -1,0 +1,13 @@
+<!doctype html>
+<html>
+    <body>
+        <h2>Autorización exitosa ✅</h2>
+        <p>Envía este código a tu bot de Telegram:</p>
+        <h1 id="code" style="letter-spacing: 4px"></h1>
+
+        <script>
+            const code = new URLSearchParams(window.location.search).get('code');
+            document.getElementById('code').textContent = code || 'No se encontró el código';
+        </script>
+    </body>
+</html>
