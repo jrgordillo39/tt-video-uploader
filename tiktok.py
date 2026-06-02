@@ -214,13 +214,43 @@ class TikTokUploader:
 
     # ─── Video Upload ─────────────────────────────────────────────────────────
 
-    async def upload_video(self, video_path: str, alias: str, caption: str = "") -> dict:
-        """Upload video to TikTok for a specific account alias."""
+    async def upload_video(
+        self,
+        video_path: str,
+        alias: str,
+        caption: str = "",
+        options: dict | None = None,
+    ) -> dict:
+        """
+        Upload video to TikTok for a specific account alias.
+
+        options keys (all optional):
+          disable_comment  bool   – Disable comments (default False)
+          disable_duet     bool   – Disable duet (default False)
+          disable_stitch   bool   – Disable stitch (default False)
+          privacy_level    str    – SELF_ONLY | FOLLOWER_OF_CREATOR | PUBLIC_TO_EVERYONE
+          brand_content    bool   – Mark as branded content / paid partnership
+          brand_organic    bool   – Mark as organic branded content (creator promoting own brand)
+        """
         if not self._refresh_account(alias):
             return {"success": False, "error": f"Cuenta '{alias}' no autenticada o token expirado."}
 
+        opts         = options or {}
         access_token = self._accounts[alias]["access_token"]
-        file_size = Path(video_path).stat().st_size
+        file_size    = Path(video_path).stat().st_size
+
+        post_info = {
+            "title":           caption[:2200] if caption else "📱 Subido con TikTok Bot",
+            "privacy_level":   opts.get("privacy_level", "SELF_ONLY"),
+            "disable_comment": opts.get("disable_comment", False),
+            "disable_duet":    opts.get("disable_duet", False),
+            "disable_stitch":  opts.get("disable_stitch", False),
+        }
+
+        # Branded content flags — both required together when enabling ads
+        if opts.get("brand_content") or opts.get("brand_organic"):
+            post_info["brand_content_toggle"]  = bool(opts.get("brand_content", False))
+            post_info["brand_organic_toggle"]  = bool(opts.get("brand_organic", False))
 
         # Step 1: Init upload
         headers = {
@@ -228,17 +258,11 @@ class TikTokUploader:
             "Content-Type": "application/json; charset=UTF-8",
         }
         init_payload = {
-            "post_info": {
-                "title": caption[:2200] if caption else "📱 Subido con TikTok Bot",
-                "privacy_level": "SELF_ONLY",
-                "disable_duet": False,
-                "disable_comment": False,
-                "disable_stitch": False,
-            },
+            "post_info":   post_info,
             "source_info": {
-                "source": "FILE_UPLOAD",
-                "video_size": file_size,
-                "chunk_size": file_size,
+                "source":            "FILE_UPLOAD",
+                "video_size":        file_size,
+                "chunk_size":        file_size,
                 "total_chunk_count": 1,
             }
         }
@@ -295,7 +319,9 @@ class TikTokUploader:
             logger.info(f"Publish status [{attempt+1}/{max_tries}]: {status}")
 
             if status == "PUBLISH_COMPLETE":
-                return {"success": True, "publish_id": publish_id}
+                # publicaly_available_post_id is the video ID usable for ads
+                video_id = data.get("publicaly_available_post_id", [None])[0] if data.get("publicaly_available_post_id") else None
+                return {"success": True, "publish_id": publish_id, "video_id": video_id}
             elif status in ("FAILED", "PUBLISH_FAILED"):
                 return {"success": False, "error": f"TikTok rechazó el video: {data.get('fail_reason', 'Unknown')}"}
 

@@ -364,6 +364,32 @@ async def _delayed_album_process(update: Update, context: ContextTypes.DEFAULT_T
         await _ask_account_and_upload(update, context, file_ids, caption)
 
 
+async def _ask_account_and_upload_single(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show options menu for single-account flow using a plain message."""
+    opts     = context.user_data.get("upload_opts", {})
+    alias    = context.user_data.get("pending_alias", "")
+    file_ids = context.user_data.get("pending_file_ids", [])
+    count    = len(file_ids)
+
+    def toggle(key):
+        return "✅" if opts.get(key) else "☐"
+
+    keyboard = [
+        [InlineKeyboardButton(f"{toggle('disable_comment')} Desactivar comentarios",  callback_data="opt_disable_comment")],
+        [InlineKeyboardButton(f"{toggle('disable_duet')}    Desactivar duetos",        callback_data="opt_disable_duet")],
+        [InlineKeyboardButton(f"{toggle('disable_stitch')}  Desactivar stitch",        callback_data="opt_disable_stitch")],
+        [InlineKeyboardButton(f"{toggle('brand_content')}   Contenido de marca (ads)", callback_data="opt_brand_content")],
+        [InlineKeyboardButton(f"{toggle('brand_organic')}   Promoción propia (ads)",   callback_data="opt_brand_organic")],
+        [InlineKeyboardButton(f"⬆️ Subir {count} video{'s' if count > 1 else ''} a {alias}", callback_data="opt_confirm")],
+    ]
+    await update.message.reply_text(
+        f"⚙️ *Opciones para `{alias}`* ({count} video{'s' if count > 1 else ''}):\n\n"
+        "Activa lo que necesites y luego pulsa *Subir*.",
+        parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+
 async def _ask_account_and_upload(update: Update, context: ContextTypes.DEFAULT_TYPE, file_ids: list, caption: str):
     """Show account selector or upload directly if only one account."""
     accounts = tiktok.list_accounts()
@@ -371,8 +397,16 @@ async def _ask_account_and_upload(update: Update, context: ContextTypes.DEFAULT_
     count_text = f"{len(file_ids)} video{'s' if len(file_ids) > 1 else ''}"
 
     if len(accounts) == 1:
-        # Solo una cuenta → subir directo
-        await _do_upload_batch(update, context, accounts[0].alias, file_ids, caption)
+        # Solo una cuenta → mostrar opciones directamente
+        context.user_data["pending_file_ids"] = file_ids
+        context.user_data["pending_caption"]  = caption
+        context.user_data["pending_alias"]    = accounts[0].alias
+        context.user_data["upload_opts"]      = {}
+        msg = await update.message.reply_text(
+            f"📦 {count_text} recibido{'s' if len(file_ids) > 1 else ''}.",
+        )
+        # Simulate a query-like object to reuse _show_options_menu
+        await _ask_account_and_upload_single(update, context)
         return
 
     # Guardar datos pendientes
@@ -395,32 +429,87 @@ async def _ask_account_and_upload(update: Update, context: ContextTypes.DEFAULT_
 
 
 async def upload_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """User selected an account — now show video options menu."""
     query = update.callback_query
     await query.answer()
 
     alias    = query.data.replace("upload_", "")
-    file_ids = context.user_data.pop("pending_file_ids", [])
-    caption  = context.user_data.pop("pending_caption", "")
+    file_ids = context.user_data.get("pending_file_ids", [])
 
     if not file_ids:
         await query.edit_message_text("❌ No se encontraron los videos. Envíalos de nuevo.")
         return
 
+    # Store selected alias and show options menu
+    context.user_data["pending_alias"] = alias
+    await _show_options_menu(query, context)
+
+
+async def _show_options_menu(query, context):
+    """Show toggle options before uploading."""
+    opts     = context.user_data.get("upload_opts", {})
+    alias    = context.user_data.get("pending_alias", "")
+    file_ids = context.user_data.get("pending_file_ids", [])
+    count    = len(file_ids)
+
+    def toggle(key):
+        return "✅" if opts.get(key) else "☐"
+
+    keyboard = [
+        [InlineKeyboardButton(f"{toggle('disable_comment')} Desactivar comentarios",  callback_data="opt_disable_comment")],
+        [InlineKeyboardButton(f"{toggle('disable_duet')}    Desactivar duetos",        callback_data="opt_disable_duet")],
+        [InlineKeyboardButton(f"{toggle('disable_stitch')}  Desactivar stitch",        callback_data="opt_disable_stitch")],
+        [InlineKeyboardButton(f"{toggle('brand_content')}   Contenido de marca (ads)",  callback_data="opt_brand_content")],
+        [InlineKeyboardButton(f"{toggle('brand_organic')}   Promoción propia (ads)",    callback_data="opt_brand_organic")],
+        [InlineKeyboardButton(f"⬆️ Subir {count} video{'s' if count > 1 else ''} a {alias}", callback_data="opt_confirm")],
+    ]
+    plural = 's' if count > 1 else ''
     await query.edit_message_text(
-        f"⏳ Procesando {len(file_ids)} video{'s' if len(file_ids) > 1 else ''} para `{alias}`...",
-        parse_mode="Markdown"
+        f"⚙️ *Opciones para `{alias}`* ({count} video{plural}):\n\nActiva lo que necesites y luego pulsa *Subir*.",
+        parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
-    await _do_upload_batch(update, context, alias, file_ids, caption, status_msg=query.message)
+
+async def options_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle option toggles and confirm button."""
+    query = update.callback_query
+    await query.answer()
+
+    action = query.data.replace("opt_", "")
+
+    if action == "confirm":
+        alias    = context.user_data.pop("pending_alias", "")
+        file_ids = context.user_data.pop("pending_file_ids", [])
+        caption  = context.user_data.pop("pending_caption", "")
+        opts     = context.user_data.pop("upload_opts", {})
+
+        if not file_ids:
+            await query.edit_message_text("❌ No se encontraron los videos.")
+            return
+
+        await query.edit_message_text(
+            f"⏳ Preparando {len(file_ids)} video{'s' if len(file_ids) > 1 else ''} para `{alias}`...",
+            parse_mode="Markdown"
+        )
+        await _do_upload_batch(update, context, alias, file_ids, caption, opts=opts, status_msg=query.message)
+
+    else:
+        # Toggle the option
+        opts = context.user_data.get("upload_opts", {})
+        opts[action] = not opts.get(action, False)
+        context.user_data["upload_opts"] = opts
+        await _show_options_menu(query, context)
 
 
-async def _do_upload_batch(update, context, alias: str, file_ids: list, caption: str, status_msg=None):
+async def _do_upload_batch(update, context, alias: str, file_ids: list, caption: str, opts: dict = None, status_msg=None):
     """Download and upload all videos in the batch sequentially."""
-    bot       = update.get_bot()
-    total     = len(file_ids)
-    acc       = tiktok.get_account(alias)
-    acc_name  = f"@{acc.username}" if acc else alias
-    results   = []
+    bot      = update.get_bot()
+    total    = len(file_ids)
+    acc      = tiktok.get_account(alias)
+    acc_name = f"@{acc.username}" if acc else alias
+    results  = []
+    opts     = opts or {}
 
     async def send(text):
         if status_msg:
@@ -440,7 +529,7 @@ async def _do_upload_batch(update, context, alias: str, file_ids: list, caption:
                 tmp_path = tmp.name
             await file.download_to_drive(tmp_path)
 
-            result = await tiktok.upload_video(tmp_path, alias=alias, caption=caption)
+            result = await tiktok.upload_video(tmp_path, alias=alias, caption=caption, options=opts)
             results.append(result)
 
         except Exception as e:
@@ -451,8 +540,11 @@ async def _do_upload_batch(update, context, alias: str, file_ids: list, caption:
                 os.unlink(tmp_path)
 
     # ── Resumen final ──
-    ok      = sum(1 for r in results if r.get("success"))
-    failed  = total - ok
+    ok     = sum(1 for r in results if r.get("success"))
+    failed = total - ok
+
+    # Collect video_ids for ads
+    video_ids = [r.get("video_id") for r in results if r.get("success") and r.get("video_id")]
 
     if failed == 0:
         msg = (
@@ -460,6 +552,12 @@ async def _do_upload_batch(update, context, alias: str, file_ids: list, caption:
             f"a {acc_name} exitosamente!\n"
             f"🎵 Puede tardar unos minutos en aparecer."
         )
+        if opts.get("brand_content") or opts.get("brand_organic"):
+            if video_ids:
+                ids_text = "\n".join(f"  • `{vid}`" for vid in video_ids)
+                msg += f"\n\n📢 *IDs para publicidad en TikTok Ads Manager:*\n{ids_text}"
+            else:
+                msg += "\n\n📢 El video fue marcado para publicidad. El ID estará disponible en tu perfil de TikTok en unos minutos."
     elif ok == 0:
         errors = "\n".join(f"• Video {i+1}: {r.get('error')}" for i, r in enumerate(results))
         msg = f"❌ Todos los videos fallaron:\n{errors}"
@@ -535,6 +633,7 @@ def main():
     app.add_handler(CallbackQueryHandler(seleccionar_callback, pattern="^select_"))
     app.add_handler(CallbackQueryHandler(eliminarcuenta_callback, pattern="^delete_"))
     app.add_handler(CallbackQueryHandler(upload_callback, pattern="^upload_"))
+    app.add_handler(CallbackQueryHandler(options_callback, pattern="^opt_"))
     app.add_handler(MessageHandler(filters.VIDEO | filters.Document.VIDEO, handle_video))
 
     logger.info("🤖 Bot iniciado con soporte multi-cuenta y multi-video...")
