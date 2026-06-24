@@ -302,7 +302,25 @@ class TikTokUploader:
             init_resp = await client.post(self.UPLOAD_INIT_URL, json=init_payload, headers=headers)
 
         if init_resp.status_code != 200:
-            return {"success": False, "error": f"Error al inicializar upload: {init_resp.text}"}
+            error_text = init_resp.text
+            try:
+                err_data = init_resp.json().get("error", {})
+                err_code = str(err_data.get("code", "")).lower()
+                err_message = err_data.get("message", "")
+                if err_code == "unauditedclientcanonlyposttoprivateaccounts":
+                    return {
+                        "success": False,
+                        "error": (
+                            "Tu app de TikTok aun no esta auditada y solo puede publicar en cuentas privadas. "
+                            "Pon la cuenta de TikTok en modo privado e intenta de nuevo, o solicita auditoria/revision "
+                            "de la app en TikTok Developer para publicar sin esta restriccion."
+                        ),
+                    }
+                if err_message:
+                    error_text = err_message
+            except Exception:
+                pass
+            return {"success": False, "error": f"Error al inicializar upload: {error_text}"}
 
         init_data  = init_resp.json().get("data", {})
         upload_url = init_data.get("upload_url")

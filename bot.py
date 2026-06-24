@@ -3,6 +3,7 @@ import asyncio
 import logging
 import tempfile
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.error import Conflict
 from telegram.ext import (
     Application, CommandHandler, MessageHandler,
     CallbackQueryHandler, ContextTypes, filters,
@@ -598,6 +599,20 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(text, parse_mode="Markdown")
 
+
+async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
+    """Handle unexpected exceptions from handlers and polling loop."""
+    err = context.error
+    if isinstance(err, Conflict):
+        logger.error(
+            "Conflicto de getUpdates: hay otra instancia usando el mismo bot token. "
+            "Esta instancia se detendra para evitar bucles de error."
+        )
+        context.application.stop_running()
+        return
+
+    logger.exception("Error no controlado en el bot", exc_info=err)
+
 # ─── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -635,6 +650,7 @@ def main():
     app.add_handler(CallbackQueryHandler(upload_callback, pattern="^upload_"))
     app.add_handler(CallbackQueryHandler(options_callback, pattern="^opt_"))
     app.add_handler(MessageHandler(filters.VIDEO | filters.Document.VIDEO, handle_video))
+    app.add_error_handler(global_error_handler)
 
     logger.info("🤖 Bot iniciado con soporte multi-cuenta y multi-video...")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
