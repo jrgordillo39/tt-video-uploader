@@ -12,7 +12,9 @@ from urllib.parse import urlencode
 
 logger = logging.getLogger(__name__)
 
-TOKENS_FILE = "tiktok_tokens.json"
+BASE_DIR = Path(__file__).resolve().parent
+TOKENS_FILE = Path(os.getenv("TIKTOK_TOKENS_FILE", str(BASE_DIR / "tiktok_tokens.json")))
+STATE_FILE = Path(os.getenv("TIKTOK_STATE_FILE", str(BASE_DIR / "tiktok_state.json")))
 
 class TikTokAccount:
     """Represents a single authenticated TikTok account."""
@@ -52,19 +54,43 @@ class TikTokUploader:
         self._accounts: dict[str, dict] = self._load_all()
 
         # alias of the currently selected account (per-session)
-        self._selected: str | None = None
+        self._selected: str | None = self._load_selected_alias()
 
     # ─── Persistence ──────────────────────────────────────────────────────────
 
     def _load_all(self) -> dict:
-        if Path(TOKENS_FILE).exists():
-            with open(TOKENS_FILE) as f:
-                return json.load(f)
+        if TOKENS_FILE.exists():
+            try:
+                with open(TOKENS_FILE, encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, dict):
+                        return data
+                    logger.error(f"Invalid tokens format in {TOKENS_FILE}; expected object.")
+            except Exception as exc:
+                logger.error(f"Could not read tokens file {TOKENS_FILE}: {exc}")
         return {}
 
     def _save_all(self):
-        with open(TOKENS_FILE, "w") as f:
+        TOKENS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(TOKENS_FILE, "w", encoding="utf-8") as f:
             json.dump(self._accounts, f, indent=2)
+
+    def _load_selected_alias(self) -> str | None:
+        if STATE_FILE.exists():
+            try:
+                with open(STATE_FILE, encoding="utf-8") as f:
+                    data = json.load(f)
+                alias = data.get("selected_alias")
+                if isinstance(alias, str) and alias:
+                    return alias
+            except Exception as exc:
+                logger.error(f"Could not read state file {STATE_FILE}: {exc}")
+        return None
+
+    def _save_selected_alias(self):
+        STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(STATE_FILE, "w", encoding="utf-8") as f:
+            json.dump({"selected_alias": self._selected}, f, indent=2)
 
     # ─── Account Management ───────────────────────────────────────────────────
 
@@ -81,12 +107,14 @@ class TikTokUploader:
             self._save_all()
             if self._selected == alias:
                 self._selected = None
+                self._save_selected_alias()
             return True
         return False
 
     def select_account(self, alias: str) -> bool:
         if alias in self._accounts:
             self._selected = alias
+            self._save_selected_alias()
             return True
         return False
 
@@ -164,6 +192,9 @@ class TikTokUploader:
 
         self._accounts[alias] = data
         self._save_all()
+        if len(self._accounts) == 1 or not self._selected:
+            self._selected = alias
+            self._save_selected_alias()
         logger.info(f"Account '{alias}' authenticated.")
         return True
 
