@@ -1,9 +1,10 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Inicio — TikTok Bot</title>
+        <title>Home — UpMarket Bot</title>
+        <link rel="icon" href="icon.png" />
         <link
             href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
             rel="stylesheet"
@@ -57,9 +58,12 @@
                 gap: 1.25rem;
             }
             .logo {
-                width: 42px;
-                height: 42px;
-                background: linear-gradient(135deg, var(--accent), var(--accent2));
+                width: 82px;
+                height: 82px;
+                /* background: linear-gradient(135deg, var(--accent), var(--accent2)); */
+                background-image: url('./icon.png');
+                background-size: cover;
+                background-position: center;
                 border-radius: 10px;
                 display: grid;
                 place-items: center;
@@ -206,46 +210,68 @@
             footer a:hover {
                 text-decoration: underline;
             }
+            ul.clean {
+                list-style: none;
+                padding: 0;
+                margin: 0.5rem 0;
+            }
+            ul.clean li {
+                font-size: 0.92rem;
+                color: var(--text);
+                padding: 0.35rem 0 0.35rem 1.4rem;
+                position: relative;
+            }
+            ul.clean li::before {
+                content: '→';
+                position: absolute;
+                left: 0;
+                color: var(--accent);
+                font-size: 0.85rem;
+            }
         </style>
     </head>
     <body>
         <header>
-            <div class="logo">🎬</div>
+            <!-- <img src="icon.png" alt="Logo" /> -->
+            <div class="logo"></div>
             <div class="header-text">
-                <h1>TikTok Upload Bot</h1>
-                <p>Sube videos a TikTok desde Telegram</p>
+                <h1>UpMarket Bot</h1>
+                <p>Upload videos to TikTok from Telegram</p>
             </div>
         </header>
         <main class="container">
             <div class="hero">
-                <span class="tag">Inicio</span>
-                <h2>Sube videos a<br /><span>TikTok desde Telegram</span></h2>
+                <span class="tag">Home</span>
+                <h2>Upload videos to<br /><span>TikTok via Telegram</span></h2>
                 <p>
-                    Conecta tu cuenta de TikTok y sube videos fácilmente usando tu bot de Telegram. Seguro, privado y
-                    sin complicaciones.
+                    Connect your TikTok account and easily publish videos using our Telegram bot. Secure, private, and
+                    hassle-free.
                 </p>
-                <a class="cta-btn" href="https://t.me/ttvideouploaderbot">Empezar en Telegram</a>
+                <a class="cta-btn" href="https://t.me/ttvideouploaderbot" target="_blank">Start on Telegram</a>
             </div>
             <div class="features">
                 <div class="feature">
                     <div class="feature-icon">🔒</div>
-                    <div class="feature-title">Privacidad primero</div>
+                    <div class="feature-title">Privacy First</div>
                     <div class="feature-desc">
-                        Tus tokens y videos no se comparten ni venden. Eliminación automática tras subir el video.
+                        Your tokens and videos are never shared or sold. Videos are automatically deleted from our
+                        servers post-upload.
                     </div>
                 </div>
                 <div class="feature">
                     <div class="feature-icon">⚡</div>
-                    <div class="feature-title">Rápido y sencillo</div>
+                    <div class="feature-title">Fast & Simple</div>
                     <div class="feature-desc">
-                        Envía tu video al bot y estará en TikTok en segundos. Sin pasos complicados.
+                        Send your video to the bot and it will be published to your TikTok account in seconds. No
+                        complicated steps.
                     </div>
                 </div>
                 <div class="feature">
                     <div class="feature-icon">🤖</div>
-                    <div class="feature-title">100% automatizado</div>
+                    <div class="feature-title">100% Automated</div>
                     <div class="feature-desc">
-                        No necesitas instalar nada extra. Todo funciona desde Telegram y la nube.
+                        No extra applications to install. Everything works seamlessly within Telegram and our cloud
+                        infrastructure.
                     </div>
                 </div>
             </div>
@@ -260,7 +286,7 @@
                         text-align: center;
                     "
                 >
-                    Guía rápida
+                    Quick User Guide
                 </h2>
                 <div style="max-width: 700px; margin: 0 auto">
                     <h3
@@ -272,9 +298,12 @@
                             margin-bottom: 0.7rem;
                         "
                     >
-                        ¿Qué es?
+                        What is this?
                     </h3>
-                    <p>Bot de Telegram que recibe videos y los sube automáticamente a TikTok.</p>
+                    <p>
+                        It's an automated Telegram bot designed to receive your media files and publish them directly to
+                        your connected TikTok profile.
+                    </p>
 
                     <h3
                         style="
@@ -285,12 +314,11 @@
                             margin: 1.5rem 0 0.7rem 0;
                         "
                     >
-                        Requisitos
+                        Requirements
                     </h3>
                     <ul class="clean">
-                        <li>Python 3.10+</li>
-                        <li>Cuenta de Telegram</li>
-                        <li>Cuenta de TikTok Developer</li>
+                        <li>An active Telegram account.</li>
+                        <li>An active TikTok account.</li>
                     </ul>
 
                     <h3
@@ -302,12 +330,15 @@
                             margin: 1.5rem 0 0.7rem 0;
                         "
                     >
-                        ¿Cómo funciona?
+                        How does it work?
                     </h3>
-                    <ol style="margin-left: 1.2rem; margin-bottom: 1.2rem">
-                        <li>Inicia el bot con <code>python bot.py</code> o despliega en Railway/Render.</li>
-                        <li>En Telegram, envía <b>/auth</b> al bot y sigue el proceso de autenticación con TikTok.</li>
-                        <li>Envía cualquier video al bot para subirlo a tu cuenta de TikTok.</li>
+                    <ol style="margin-left: 1.2rem; margin-bottom: 1.2rem; color: var(--text)">
+                        <li>Click the "Start on Telegram" button above to open the bot.</li>
+                        <li>Send the <b>/auth</b> command in the chat to securely authorize your TikTok account.</li>
+                        <li>
+                            Once authorized, simply send any compatible video file to the bot. It will be uploaded
+                            automatically!
+                        </li>
                     </ol>
 
                     <h3
@@ -319,43 +350,27 @@
                             margin: 1.5rem 0 0.7rem 0;
                         "
                     >
-                        Configuración rápida
+                        Important Upload Limits
                     </h3>
                     <ul class="clean">
-                        <li>Clona el proyecto y ejecuta <code>pip install -r requirements.txt</code></li>
-                        <li>Configura tus credenciales en el archivo <code>.env</code></li>
-                        <li>Obtén tu <b>Telegram Bot Token</b> con @BotFather</li>
                         <li>
-                            Registra tu app en
-                            <a href="https://developers.tiktok.com" target="_blank">TikTok Developers</a> y copia los
-                            datos a <code>.env</code>
+                            <b>File Size:</b> Due to Telegram's bot API restrictions, the maximum video size supported
+                            is <b>50MB</b>.
                         </li>
-                    </ul>
-
-                    <h3
-                        style="
-                            font-family: 'Syne', sans-serif;
-                            font-size: 1.1rem;
-                            font-weight: 700;
-                            color: var(--accent);
-                            margin: 1.5rem 0 0.7rem 0;
-                        "
-                    >
-                        Notas importantes
-                    </h3>
-                    <ul class="clean">
-                        <li>La API de TikTok requiere que tu app sea aprobada para uso público.</li>
-                        <li>Durante el desarrollo, solo el dueño de la app puede usarla.</li>
-                        <li>El tamaño máximo de video por Telegram es <b>50MB</b>.</li>
+                        <li><b>Content:</b> All uploaded videos must comply with TikTok's Community Guidelines.</li>
+                        <li>
+                            <b>Security:</b> You can revoke the bot's access at any time from your TikTok security
+                            settings.
+                        </li>
                     </ul>
                 </div>
             </section>
         </main>
         <footer>
-            <p>© 2026 TikTok Upload Bot. Todos los derechos reservados.</p>
+            <p>© 2026 TikTok Upload Bot. All rights reserved.</p>
             <div>
-                <a href="terms.html">Términos y Condiciones</a> ·
-                <a href="privacy.html">Política de Privacidad</a>
+                <a href="terms.html">Terms and Conditions</a> ·
+                <a href="privacy.html">Privacy Policy</a>
             </div>
         </footer>
     </body>

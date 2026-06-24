@@ -1,460 +1,561 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Política de Privacidad — TikTok Bot</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg:      #06080f;
-      --surface: #0d1018;
-      --border:  #181c28;
-      --accent:  #4f7cff;
-      --accent2: #a78bfa;
-      --text:    #d8dce8;
-      --muted:   #5a6075;
-      --heading: #ffffff;
-    }
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" href="icon.png" />
+        <title>Privacy Policy — UpMarket Bot</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --bg: #06080f;
+                --surface: #0d1018;
+                --border: #181c28;
+                --accent: #4f7cff;
+                --accent2: #a78bfa;
+                --text: #d8dce8;
+                --muted: #5a6075;
+                --heading: #ffffff;
+            }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
 
-    html { scroll-behavior: smooth; }
+            html {
+                scroll-behavior: smooth;
+            }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 16px;
-      line-height: 1.75;
-      min-height: 100vh;
-    }
+            body {
+                background: var(--bg);
+                color: var(--text);
+                font-family: 'DM Sans', sans-serif;
+                font-size: 16px;
+                line-height: 1.75;
+                min-height: 100vh;
+            }
 
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 70% 50% at 90% 10%, rgba(79,124,255,0.09) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 40% at 0% 90%, rgba(167,139,250,0.06) 0%, transparent 55%);
-      pointer-events: none;
-      z-index: 0;
-    }
+            body::before {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background:
+                    radial-gradient(ellipse 70% 50% at 90% 10%, rgba(79, 124, 255, 0.09) 0%, transparent 60%),
+                    radial-gradient(ellipse 50% 40% at 0% 90%, rgba(167, 139, 250, 0.06) 0%, transparent 55%);
+                pointer-events: none;
+                z-index: 0;
+            }
 
-    /* ── Grid pattern overlay ── */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(79,124,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(79,124,255,0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      z-index: 0;
-    }
+            /* ── Grid pattern overlay ── */
+            body::after {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background-image:
+                    linear-gradient(rgba(79, 124, 255, 0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(79, 124, 255, 0.03) 1px, transparent 1px);
+                background-size: 40px 40px;
+                pointer-events: none;
+                z-index: 0;
+            }
 
-    header {
-      position: relative;
-      z-index: 1;
-      border-bottom: 1px solid var(--border);
-      padding: 2.5rem clamp(1.5rem, 6vw, 8rem);
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-    }
+            header {
+                position: relative;
+                z-index: 1;
+                border-bottom: 1px solid var(--border);
+                padding: 2.5rem clamp(1.5rem, 6vw, 8rem);
+                display: flex;
+                align-items: center;
+                gap: 1.25rem;
+            }
 
-    .logo {
-      width: 42px;
-      height: 42px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      font-size: 1.1rem;
-      flex-shrink: 0;
-    }
+            .logo {
+                width: 42px;
+                height: 42px;
+                background: linear-gradient(135deg, var(--accent), var(--accent2));
+                border-radius: 10px;
+                display: grid;
+                place-items: center;
+                font-size: 1.1rem;
+                flex-shrink: 0;
+            }
 
-    .header-text h1 {
-      font-family: 'Syne', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--heading);
-      letter-spacing: 0.02em;
-    }
+            .header-text h1 {
+                font-family: 'Syne', sans-serif;
+                font-size: 1rem;
+                font-weight: 700;
+                color: var(--heading);
+                letter-spacing: 0.02em;
+            }
 
-    .header-text p { font-size: 0.8rem; color: var(--muted); }
+            .header-text p {
+                font-size: 0.8rem;
+                color: var(--muted);
+            }
 
-    .container {
-      position: relative;
-      z-index: 1;
-      max-width: 780px;
-      margin: 0 auto;
-      padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 5vw, 2rem);
-    }
+            .container {
+                position: relative;
+                z-index: 1;
+                max-width: 780px;
+                margin: 0 auto;
+                padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 5vw, 2rem);
+            }
 
-    .hero {
-      margin-bottom: 4rem;
-      padding-bottom: 3rem;
-      border-bottom: 1px solid var(--border);
-    }
+            .hero {
+                margin-bottom: 4rem;
+                padding-bottom: 3rem;
+                border-bottom: 1px solid var(--border);
+            }
 
-    .tag {
-      display: inline-block;
-      font-family: 'Syne', sans-serif;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--accent);
-      border: 1px solid rgba(79,124,255,0.3);
-      padding: 0.3rem 0.8rem;
-      border-radius: 2rem;
-      margin-bottom: 1.5rem;
-    }
+            .tag {
+                display: inline-block;
+                font-family: 'Syne', sans-serif;
+                font-size: 0.7rem;
+                font-weight: 700;
+                letter-spacing: 0.15em;
+                text-transform: uppercase;
+                color: var(--accent);
+                border: 1px solid rgba(79, 124, 255, 0.3);
+                padding: 0.3rem 0.8rem;
+                border-radius: 2rem;
+                margin-bottom: 1.5rem;
+            }
 
-    .hero h2 {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(2.2rem, 5vw, 3.5rem);
-      font-weight: 800;
-      color: var(--heading);
-      line-height: 1.1;
-      margin-bottom: 1.2rem;
-    }
+            .hero h2 {
+                font-family: 'Syne', sans-serif;
+                font-size: clamp(2.2rem, 5vw, 3.5rem);
+                font-weight: 800;
+                color: var(--heading);
+                line-height: 1.1;
+                margin-bottom: 1.2rem;
+            }
 
-    .hero h2 span {
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+            .hero h2 span {
+                background: linear-gradient(90deg, var(--accent), var(--accent2));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
 
-    .hero p { color: var(--muted); font-size: 0.95rem; max-width: 520px; }
+            .hero p {
+                color: var(--muted);
+                font-size: 0.95rem;
+                max-width: 520px;
+            }
 
-    .updated {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-top: 1.2rem;
-    }
+            .updated {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                font-size: 0.8rem;
+                color: var(--muted);
+                margin-top: 1.2rem;
+            }
 
-    .updated::before {
-      content: '';
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      background: #22c55e;
-      border-radius: 50%;
-    }
+            .updated::before {
+                content: '';
+                display: inline-block;
+                width: 6px;
+                height: 6px;
+                background: #22c55e;
+                border-radius: 50%;
+            }
 
-    /* ── Data table summary ── */
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
-      margin-bottom: 3rem;
-    }
+            /* ── Data table summary ── */
+            .summary-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 1rem;
+                margin-bottom: 3rem;
+            }
 
-    .summary-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.2rem 1.4rem;
-      animation: fadeUp 0.4s ease both;
-    }
+            .summary-card {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                padding: 1.2rem 1.4rem;
+                animation: fadeUp 0.4s ease both;
+            }
 
-    .summary-card:nth-child(1) { animation-delay: 0.0s; }
-    .summary-card:nth-child(2) { animation-delay: 0.08s; }
-    .summary-card:nth-child(3) { animation-delay: 0.16s; }
-    .summary-card:nth-child(4) { animation-delay: 0.24s; }
+            .summary-card:nth-child(1) {
+                animation-delay: 0s;
+            }
+            .summary-card:nth-child(2) {
+                animation-delay: 0.08s;
+            }
+            .summary-card:nth-child(3) {
+                animation-delay: 0.16s;
+            }
+            .summary-card:nth-child(4) {
+                animation-delay: 0.24s;
+            }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+            @keyframes fadeUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(14px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
 
-    .summary-card .label {
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.4rem;
-    }
+            .summary-card .label {
+                font-size: 0.72rem;
+                font-weight: 500;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: var(--muted);
+                margin-bottom: 0.4rem;
+            }
 
-    .summary-card .value {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: var(--heading);
-    }
+            .summary-card .value {
+                font-family: 'Syne', sans-serif;
+                font-size: 0.9rem;
+                font-weight: 700;
+                color: var(--heading);
+            }
 
-    .badge {
-      display: inline-block;
-      padding: 0.15rem 0.6rem;
-      border-radius: 2rem;
-      font-size: 0.72rem;
-      font-weight: 600;
-    }
+            .badge {
+                display: inline-block;
+                padding: 0.15rem 0.6rem;
+                border-radius: 2rem;
+                font-size: 0.72rem;
+                font-weight: 600;
+            }
 
-    .badge.green { background: rgba(34,197,94,0.15); color: #22c55e; }
-    .badge.blue  { background: rgba(79,124,255,0.15); color: #4f7cff; }
-    .badge.red   { background: rgba(239,68,68,0.15);  color: #ef4444; }
+            .badge.green {
+                background: rgba(34, 197, 94, 0.15);
+                color: #22c55e;
+            }
+            .badge.blue {
+                background: rgba(79, 124, 255, 0.15);
+                color: #4f7cff;
+            }
+            .badge.red {
+                background: rgba(239, 68, 68, 0.15);
+                color: #ef4444;
+            }
 
-    /* ── Sections ── */
-    .section {
-      margin-bottom: 2.5rem;
-      padding: 2rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      position: relative;
-      overflow: hidden;
-      animation: fadeUp 0.5s ease both;
-    }
+            /* ── Sections ── */
+            .section {
+                margin-bottom: 2.5rem;
+                padding: 2rem;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                position: relative;
+                overflow: hidden;
+                animation: fadeUp 0.5s ease both;
+            }
 
-    .section::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 3px;
-      height: 100%;
-      background: linear-gradient(180deg, var(--accent), var(--accent2));
-      border-radius: 3px 0 0 3px;
-    }
+            .section::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 3px;
+                height: 100%;
+                background: linear-gradient(180deg, var(--accent), var(--accent2));
+                border-radius: 3px 0 0 3px;
+            }
 
-    .section h3 {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--heading);
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
+            .section h3 {
+                font-family: 'Syne', sans-serif;
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: var(--heading);
+                margin-bottom: 1rem;
+                display: flex;
+                align-items: center;
+                gap: 0.6rem;
+            }
 
-    .section p {
-      font-size: 0.92rem;
-      color: var(--text);
-      margin-bottom: 0.75rem;
-    }
+            .section p {
+                font-size: 0.92rem;
+                color: var(--text);
+                margin-bottom: 0.75rem;
+            }
 
-    .section p:last-child { margin-bottom: 0; }
+            .section p:last-child {
+                margin-bottom: 0;
+            }
 
-    ul.clean {
-      list-style: none;
-      padding: 0;
-      margin: 0.5rem 0;
-    }
+            ul.clean {
+                list-style: none;
+                padding: 0;
+                margin: 0.5rem 0;
+            }
 
-    ul.clean li {
-      font-size: 0.92rem;
-      color: var(--text);
-      padding: 0.35rem 0 0.35rem 1.4rem;
-      position: relative;
-    }
+            ul.clean li {
+                font-size: 0.92rem;
+                color: var(--text);
+                padding: 0.35rem 0 0.35rem 1.4rem;
+                position: relative;
+            }
 
-    ul.clean li::before {
-      content: '→';
-      position: absolute;
-      left: 0;
-      color: var(--accent);
-      font-size: 0.85rem;
-    }
+            ul.clean li::before {
+                content: '→';
+                position: absolute;
+                left: 0;
+                color: var(--accent);
+                font-size: 0.85rem;
+            }
 
-    table.data-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.88rem;
-      margin-top: 1rem;
-    }
+            table.data-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 0.88rem;
+                margin-top: 1rem;
+            }
 
-    table.data-table th {
-      text-align: left;
-      font-family: 'Syne', sans-serif;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      padding: 0.6rem 0.8rem;
-      border-bottom: 1px solid var(--border);
-    }
+            table.data-table th {
+                text-align: left;
+                font-family: 'Syne', sans-serif;
+                font-size: 0.75rem;
+                font-weight: 700;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: var(--muted);
+                padding: 0.6rem 0.8rem;
+                border-bottom: 1px solid var(--border);
+            }
 
-    table.data-table td {
-      padding: 0.65rem 0.8rem;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      color: var(--text);
-      vertical-align: top;
-    }
+            table.data-table td {
+                padding: 0.65rem 0.8rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+                color: var(--text);
+                vertical-align: top;
+            }
 
-    table.data-table tr:last-child td { border-bottom: none; }
+            table.data-table tr:last-child td {
+                border-bottom: none;
+            }
 
-    .highlight-box {
-      background: rgba(79,124,255,0.07);
-      border: 1px solid rgba(79,124,255,0.2);
-      border-radius: 8px;
-      padding: 1rem 1.25rem;
-      margin-top: 1rem;
-      font-size: 0.88rem;
-      color: var(--text);
-    }
+            .highlight-box {
+                background: rgba(79, 124, 255, 0.07);
+                border: 1px solid rgba(79, 124, 255, 0.2);
+                border-radius: 8px;
+                padding: 1rem 1.25rem;
+                margin-top: 1rem;
+                font-size: 0.88rem;
+                color: var(--text);
+            }
 
-    footer {
-      position: relative;
-      z-index: 1;
-      border-top: 1px solid var(--border);
-      padding: 2.5rem clamp(1.5rem, 6vw, 8rem);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      align-items: center;
-      justify-content: space-between;
-    }
+            footer {
+                position: relative;
+                z-index: 1;
+                border-top: 1px solid var(--border);
+                padding: 2.5rem clamp(1.5rem, 6vw, 8rem);
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1rem;
+                align-items: center;
+                justify-content: space-between;
+            }
 
-    footer p { font-size: 0.82rem; color: var(--muted); }
+            footer p {
+                font-size: 0.82rem;
+                color: var(--muted);
+            }
 
-    footer a {
-      color: var(--accent);
-      text-decoration: none;
-      font-size: 0.82rem;
-      font-weight: 500;
-    }
+            footer a {
+                color: var(--accent);
+                text-decoration: none;
+                font-size: 0.82rem;
+                font-weight: 500;
+            }
 
-    footer a:hover { text-decoration: underline; }
-  </style>
-</head>
-<body>
+            footer a:hover {
+                text-decoration: underline;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <div class="logo">🔒</div>
+            <div class="header-text">
+                <h1>UpMarket Bot</h1>
+                <p>Legal Documentation</p>
+            </div>
+        </header>
 
-<header>
-  <div class="logo">🔒</div>
-  <div class="header-text">
-    <h1>TikTok Upload Bot</h1>
-    <p>Documentación legal</p>
-  </div>
-</header>
+        <main class="container">
+            <div class="hero">
+                <span class="tag">Privacy</span>
+                <h2>Privacy<br /><span>Policy</span></h2>
+                <p>
+                    Your privacy is important. This policy explains what data we collect, how we use it, and how we
+                    protect it while you use our services.
+                </p>
+                <span class="updated">Last updated: June 2026</span>
+            </div>
 
-<main class="container">
+            <!-- Summary cards -->
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="label">Data Selling</div>
+                    <div class="value"><span class="badge red">Never</span></div>
+                </div>
+                <div class="summary-card">
+                    <div class="label">Passwords</div>
+                    <div class="value"><span class="badge green">Not Stored</span></div>
+                </div>
+                <div class="summary-card">
+                    <div class="label">Third Parties</div>
+                    <div class="value"><span class="badge blue">TikTok API Only</span></div>
+                </div>
+                <div class="summary-card">
+                    <div class="label">Retention</div>
+                    <div class="value"><span class="badge green">Minimal</span></div>
+                </div>
+            </div>
 
-  <div class="hero">
-    <span class="tag">Privacidad</span>
-    <h2>Política de<br><span>Privacidad</span></h2>
-    <p>Tu privacidad es importante. Esta política explica qué datos recopilamos, cómo los usamos y cómo los protegemos.</p>
-    <span class="updated">Última actualización: Mayo 2026</span>
-  </div>
+            <div class="section">
+                <h3>📌 1. Information We Collect</h3>
+                <p>
+                    Our application strictly collects the minimum necessary data to provide the automated video upload
+                    service:
+                </p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Data Type</th>
+                            <th>Source</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Telegram User ID</td>
+                            <td>Telegram</td>
+                            <td>To verify authorized access and link your session.</td>
+                        </tr>
+                        <tr>
+                            <td>TikTok Access Token</td>
+                            <td>TikTok OAuth</td>
+                            <td>To securely upload videos to your account on your behalf.</td>
+                        </tr>
+                        <tr>
+                            <td>TikTok Refresh Token</td>
+                            <td>TikTok OAuth</td>
+                            <td>To renew API access automatically without requiring constant re-logins.</td>
+                        </tr>
+                        <tr>
+                            <td>TikTok Username</td>
+                            <td>TikTok API</td>
+                            <td>To display the connected account status within the bot interface.</td>
+                        </tr>
+                        <tr>
+                            <td>Submitted Media (Videos)</td>
+                            <td>Telegram</td>
+                            <td>To process and upload to TikTok. Deleted immediately after transfer.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-  <!-- Summary cards -->
-  <div class="summary-grid">
-    <div class="summary-card">
-      <div class="label">Venta de datos</div>
-      <div class="value"><span class="badge red">Nunca</span></div>
-    </div>
-    <div class="summary-card">
-      <div class="label">Contraseñas</div>
-      <div class="value"><span class="badge green">No se almacenan</span></div>
-    </div>
-    <div class="summary-card">
-      <div class="label">Terceros</div>
-      <div class="value"><span class="badge blue">Solo TikTok API</span></div>
-    </div>
-    <div class="summary-card">
-      <div class="label">Retención</div>
-      <div class="value"><span class="badge green">Mínima</span></div>
-    </div>
-  </div>
+            <div class="section">
+                <h3>🚫 2. What We DO NOT Collect</h3>
+                <ul class="clean">
+                    <li>TikTok or Telegram passwords (authentication is token-based).</li>
+                    <li>Browsing data, cookies, or device history.</li>
+                    <li>Personal identifiable information such as your real name, email, or phone number.</li>
+                    <li>Video metadata beyond what is strictly required by the TikTok API.</li>
+                    <li>Data from other accounts or applications on your device.</li>
+                </ul>
+            </div>
 
-  <div class="section">
-    <h3>📌 1. Información que recopilamos</h3>
-    <p>El bot recopila únicamente los datos necesarios para funcionar:</p>
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Dato</th>
-          <th>Origen</th>
-          <th>Para qué se usa</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>ID de usuario de Telegram</td>
-          <td>Telegram</td>
-          <td>Verificar acceso autorizado al bot</td>
-        </tr>
-        <tr>
-          <td>Access token de TikTok</td>
-          <td>TikTok OAuth</td>
-          <td>Subir videos en nombre del usuario</td>
-        </tr>
-        <tr>
-          <td>Refresh token de TikTok</td>
-          <td>TikTok OAuth</td>
-          <td>Renovar el acceso sin reautenticación</td>
-        </tr>
-        <tr>
-          <td>Nombre de usuario de TikTok</td>
-          <td>TikTok API</td>
-          <td>Mostrar la cuenta en el bot</td>
-        </tr>
-        <tr>
-          <td>Videos enviados</td>
-          <td>Telegram</td>
-          <td>Subir a TikTok, se eliminan inmediatamente</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+            <div class="section">
+                <h3>💾 3. Data Storage & Security</h3>
+                <p>
+                    TikTok OAuth Access Tokens and Refresh Tokens are securely stored encrypted on our servers to
+                    maintain your connection.
+                </p>
+                <p>
+                    Media files (videos) sent through the bot are processed temporarily in server memory. They are
+                    <strong>strictly deleted</strong> from our infrastructure immediately after the upload to TikTok is
+                    successfully completed. We do not keep, archive, or back up any video copies.
+                </p>
+                <div class="highlight-box">
+                    🔐 We implement industry-standard security protocols to protect your authorization tokens and data
+                    against unauthorized access.
+                </div>
+            </div>
 
-  <div class="section">
-    <h3>🚫 2. Lo que NO recopilamos</h3>
-    <ul class="clean">
-      <li>Contraseñas de TikTok o Telegram</li>
-      <li>Datos de navegación o historial</li>
-      <li>Información personal como nombre real, email o teléfono</li>
-      <li>Metadatos de los videos más allá de lo necesario para subirlos</li>
-      <li>Datos de otras cuentas o aplicaciones del dispositivo</li>
-    </ul>
-  </div>
+            <div class="section">
+                <h3>🤝 4. Third-Party Sharing</h3>
+                <p>The only third-party services that process your data are:</p>
+                <ul class="clean">
+                    <li>
+                        <strong>TikTok</strong> — Receives videos and tokens to publish your content. Subject to the
+                        <a
+                            href="https://www.tiktok.com/legal/page/global/privacy-policy/en"
+                            target="_blank"
+                            style="color: var(--accent)"
+                            >TikTok Privacy Policy</a
+                        >.
+                    </li>
+                    <li>
+                        <strong>Telegram</strong> — Processes messages and files sent through the bot interface. Subject
+                        to the
+                        <a href="https://telegram.org/privacy" target="_blank" style="color: var(--accent)"
+                            >Telegram Privacy Policy</a
+                        >.
+                    </li>
+                </ul>
+                <p>
+                    We do not sell, rent, or share your data with advertisers, data brokers, or any other unauthorized
+                    third parties.
+                </p>
+            </div>
 
-  <div class="section">
-    <h3>💾 3. Almacenamiento de datos</h3>
-    <p>Los tokens de autenticación de TikTok se guardan en un archivo <code>tiktok_tokens.json</code> en el servidor donde corre el bot.</p>
-    <p>Los videos enviados se descargan temporalmente en memoria del servidor y se eliminan inmediatamente después de ser subidos a TikTok. No se conserva ninguna copia.</p>
-    <div class="highlight-box">
-      🔐 Es tu responsabilidad como operador del bot garantizar que el servidor esté debidamente protegido y que el archivo de tokens no sea accesible públicamente.
-    </div>
-  </div>
+            <div class="section">
+                <h3>🗑️ 5. Data Deletion & Revocation</h3>
+                <p>
+                    You can permanently delete your data from our servers at any time using the
+                    <code>/deleteaccount</code> command within the bot. This will immediately erase your TikTok access
+                    and refresh tokens from our database.
+                </p>
+                <p>
+                    To manually revoke our application's access directly from TikTok, navigate to: <br /><strong
+                        >TikTok App → Profile → Settings and privacy → Security and permissions → Manage app
+                        permissions</strong
+                    >.
+                </p>
+            </div>
 
-  <div class="section">
-    <h3>🤝 3. Compartición con terceros</h3>
-    <p>Los únicos terceros que reciben datos son:</p>
-    <ul class="clean">
-      <li><strong>TikTok</strong> — recibe los videos y tokens para publicar el contenido. Sujeto a la <a href="https://www.tiktok.com/legal/page/global/privacy-policy/es" target="_blank" style="color: var(--accent);">Política de Privacidad de TikTok</a>.</li>
-      <li><strong>Telegram</strong> — procesa los mensajes y archivos enviados al bot. Sujeto a la <a href="https://telegram.org/privacy" target="_blank" style="color: var(--accent);">Política de Privacidad de Telegram</a>.</li>
-    </ul>
-    <p>No se comparten datos con anunciantes, brokers de datos ni ningún otro tercero.</p>
-  </div>
+            <div class="section">
+                <h3>🔄 6. Changes to this Policy</h3>
+                <p>
+                    We may update this Privacy Policy occasionally to reflect changes in our service or API
+                    requirements. Any updates will be reflected in the "Last updated" date at the top of this page.
+                    Continued use of the bot constitutes acceptance of the updated policy.
+                </p>
+            </div>
 
-  <div class="section">
-    <h3>🗑️ 4. Eliminación de datos</h3>
-    <p>Puedes eliminar tus datos en cualquier momento usando el comando <code>/eliminarcuenta</code> en el bot. Esto borra el token de acceso y refresh token de TikTok del servidor.</p>
-    <p>Para revocar el acceso desde TikTok directamente: <strong>TikTok → Perfil → Configuración → Seguridad → Aplicaciones autorizadas</strong>.</p>
-  </div>
+            <div class="section">
+                <h3>📩 7. Contact Us</h3>
+                <p>
+                    If you have any questions, concerns about this Privacy Policy, or wish to exercise your data rights,
+                    please contact the Data Controller at:
+                </p>
+                <p><strong>support@naturalmarket.blog</strong></p>
+                <!-- IMPORTANTE: ¡Cambia este correo por el tuyo! -->
+            </div>
+        </main>
 
-  <div class="section">
-    <h3>🔄 5. Cambios en esta política</h3>
-    <p>Esta política puede actualizarse ocasionalmente. Los cambios se reflejarán en la fecha de "Última actualización" al inicio de esta página. El uso continuado del bot implica la aceptación de la política vigente.</p>
-  </div>
-
-</main>
-
-<footer>
-  <p>© 2026 TikTok Upload Bot. Todos los derechos reservados.</p>
-  <a href="terms.html">Términos y Condiciones →</a>
-</footer>
-
-</body>
+        <footer>
+            <p>© 2026 TikTok Upload Bot. All rights reserved.</p>
+            <a href="terms.html">Terms and Conditions →</a>
+        </footer>
+    </body>
 </html>

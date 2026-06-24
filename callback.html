@@ -1,9 +1,10 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Autorización exitosa — TikTok Bot</title>
+        <link rel="icon" href="icon.png" />
+        <title>Authorization Successful — UpMarket Bot</title>
         <link
             href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
             rel="stylesheet"
@@ -154,7 +155,6 @@
                 text-align: center;
                 min-width: 220px;
                 max-width: 100%;
-                /* word-wrap: break-word; */
                 word-break: break-all;
             }
 
@@ -210,28 +210,28 @@
         <header>
             <div class="logo">✅</div>
             <div class="header-text">
-                <h1>TikTok Upload Bot</h1>
-                <p>Autorización exitosa</p>
+                <h1>UpMarket Bot</h1>
+                <p>Authorization Successful</p>
             </div>
         </header>
 
         <main class="container">
             <div class="success-box">
-                <h2>¡Autorización exitosa!</h2>
-                <p>Envía este código a tu bot de Telegram:</p>
+                <h2>Authorization Successful!</h2>
+                <p>Send this code to your Telegram bot:</p>
                 <div class="code-box" id="code">...</div>
-                <div class="code-desc">Copia y pégalo en el chat del bot para completar el proceso.</div>
+                <div class="code-desc">Copy and paste it into the bot chat to complete the process.</div>
             </div>
         </main>
 
         <footer>
-            <p>© 2026 TikTok Upload Bot. Todos los derechos reservados.</p>
-            <a href="privacy.html">Política de Privacidad</a>
+            <p>© 2026 UpMarket Bot. All rights reserved.</p>
+            <a href="privacy.html">Privacy Policy</a>
         </footer>
 
         <script>
             const code = new URLSearchParams(window.location.search).get('code');
-            document.getElementById('code').textContent = code || 'No se encontró el código';
+            document.getElementById('code').textContent = code || 'Code not found';
         </script>
     </body>
 </html>

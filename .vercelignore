@@ -1,0 +1,5 @@
+*
+!*.html
+!*.png
+!.vercelignore
+!vercel.json
